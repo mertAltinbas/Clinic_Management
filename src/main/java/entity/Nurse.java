@@ -23,8 +23,8 @@ public class Nurse extends Employee {
     public Nurse() {
     }
 
-    public Nurse(String name, String middleName, String surname, Set<String> phoneNumber, BigDecimal salary, String shift, Set<String> certification, String assignedWard, boolean isScrubNurse) {
-        super(name, middleName, surname, phoneNumber, salary, shift);
+    public Nurse(String employeeCode, String name, String middleName, String surname, Set<String> phoneNumber, BigDecimal salary, String shift, Set<String> certification, String assignedWard, boolean isScrubNurse) {
+        super(employeeCode, name, middleName, surname, phoneNumber, salary, shift);
         if (certification != null) {
             this.certification.addAll(certification);
         }

@@ -11,14 +11,19 @@ public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "invoice_id", nullable = false, unique = true)
     private String invoiceId;
+
     @Column(name = "total_amount", nullable = false)
     private BigDecimal totalAmount;
+
     @Column(name = "issue_date", nullable = false)
     private LocalDate issueDate;
+
     @Column(name = "is_paid", nullable = false)
     private Boolean isPaid;
+
     @Column(name = "vat_rate", nullable = false)
     private Float vatRate;
 

@@ -8,12 +8,16 @@ import java.util.Objects;
 public class Address {
     @Column(name = "country", nullable = false)
     private String country;
+
     @Column(name = "city", nullable = false)
     private String city;
+
     @Column(name = "street", nullable = false)
     private String street;
+
     @Column(name = "apartment_num")
     private String apartmentNum;
+
     @Column(name = "postal_code", nullable = false)
     private String postalCode;
 

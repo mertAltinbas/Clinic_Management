@@ -12,6 +12,9 @@ public abstract class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "employee_code", unique = true, nullable = false)
+    private String employeeCode;
+
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -32,10 +35,20 @@ public abstract class Employee {
     @Column(name = "shift", nullable = false)
     private String shift;
 
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "employee_department",
+            joinColumns = @JoinColumn(name = "employee_id"),
+            inverseJoinColumns = @JoinColumn(name = "department_id")
+    )
+    private List<Department> departments =  new ArrayList<Department>();
+
     public Employee() {
     }
 
-    public Employee(String name, String middleName, String surname, Set<String> phoneNumber, BigDecimal salary, String shift) {
+    public Employee(String employeeCode, String name, String middleName, String surname, Set<String> phoneNumber, BigDecimal salary, String shift) {
+        setEmployeeCode(employeeCode);
         setName(name);
         setMiddleName(middleName);
         setSurname(surname);
@@ -48,6 +61,10 @@ public abstract class Employee {
 
     public Long getId() {
         return id;
+    }
+
+    public String getEmployeeCode() {
+        return employeeCode;
     }
 
     public String getName() {
@@ -72,6 +89,11 @@ public abstract class Employee {
 
     public String getShift() {
         return shift;
+    }
+
+    public void setEmployeeCode(String employeeCode) {
+        Objects.requireNonNull(employeeCode, "Employee code cannot be null");
+        this.employeeCode = employeeCode;
     }
 
     public void setName(String name) {
@@ -111,4 +133,37 @@ public abstract class Employee {
     }
 
     public abstract BigDecimal calculateBonus();
+
+    public List<Department> getDepartments() {
+        return Collections.unmodifiableList(departments);
+    }
+
+    public void addDepartment(Department department) {
+        Objects.requireNonNull(department, "Department cannot be null");
+        if (!this.departments.contains(department)) {
+            this.departments.add(department);
+            department.addEmployee(this);
+        }
+    }
+
+    public void removeDepartment(Department department) {
+        Objects.requireNonNull(department, "Department cannot be null");
+        if (this.departments.contains(department)) {
+            this.departments.remove(department);
+            department.removeEmployee(this);
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Employee)) return false;
+        Employee employee = (Employee) o;
+        return Objects.equals(employeeCode, employee.employeeCode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(employeeCode);
+    }
 }

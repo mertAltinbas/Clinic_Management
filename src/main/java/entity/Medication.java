@@ -16,26 +16,35 @@ public class Medication {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
     @Column(name = "name", nullable = false)
     private String name;
+
     @ElementCollection
     @CollectionTable(name = "medication_active_ingredient", joinColumns = @JoinColumn(name = "medication_id"))
     @Column(name = "active_ingredient", nullable = false)
     private Set<String> activeIngredient = new HashSet<>();
+
     @Column(name = "medication_form", nullable = false)
     @Enumerated(EnumType.STRING)
     private MedicationForm medicationForm;
+
     @Column(name = "dose", nullable = false)
     private String dose;
+
     @Column(name = "medication_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private MedicationType medicationType;
+
     @Column(name = "administration_route")
     private String administrationRoute;
+
     @Column(name = "storage_conditions")
     private String storageConditions;
+
     @Column(name = "frequency")
     private String frequency;
+
     @Column(name = "duration_day")
     private Integer durationDay;
 

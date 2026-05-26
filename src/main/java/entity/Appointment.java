@@ -12,8 +12,10 @@ public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "date", nullable = false)
     private LocalDate date;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private StatusType status;

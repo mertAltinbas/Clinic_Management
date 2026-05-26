@@ -14,12 +14,15 @@ public class MedicalNotes {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
     @ElementCollection
     @CollectionTable(name = "medical_notes_diagnosis", joinColumns = @JoinColumn(name = "medical_notes_id"))
     @Column(name = "diagnosis")
     private Set<String> diagnosis = new HashSet<String>();
+
     @Column(name = "treatment", nullable = false)
     private String treatment;
+
     @Column(name = "creation_date", nullable = false)
     private LocalDate creationDate;
 

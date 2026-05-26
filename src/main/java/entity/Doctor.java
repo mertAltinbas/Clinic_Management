@@ -9,16 +9,18 @@ import java.util.Set;
 
 @Entity
 @Table(name = "doctor")
-public class Doctor extends Employee{
+public class Doctor extends Employee {
     @Column(name = "license_number", nullable = false)
     private String licenseNumber;
+
     @Column(name = "consultation_fee", nullable = false)
     private float consultationFee;
 
-    public Doctor() {}
+    public Doctor() {
+    }
 
-    public Doctor(String name, String middleName, String surname, Set<String> phoneNumber, BigDecimal salary, String shift, String licenseNumber, float consultationFee) {
-        super(name, middleName, surname, phoneNumber, salary, shift);
+    public Doctor(String employeeCode, String name, String middleName, String surname, Set<String> phoneNumber, BigDecimal salary, String shift, String licenseNumber, float consultationFee) {
+        super(employeeCode, name, middleName, surname, phoneNumber, salary, shift);
         setLicenseNumber(licenseNumber);
         setConsultationFee(consultationFee);
     }

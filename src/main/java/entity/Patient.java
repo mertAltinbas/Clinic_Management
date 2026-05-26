@@ -17,18 +17,24 @@ public class Patient {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
     @Column(name = "first_name", nullable = false)
     private String firstName;
+
     @Column(name = "last_name", nullable = false)
     private String lastName;
+
     @Column(name = "date_of_birth", nullable = false)
     private LocalDate dateOfBirth;
+
     @ElementCollection
     @CollectionTable(name = "patient_phone", joinColumns = @JoinColumn(name = "patient_id"))
     @Column(name = "phone_number")
     private Set<String> phoneNumber = new HashSet<String>();
+
     @Embedded
     private Address homeAddress;
+
     @Column(name = "blood_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private BloodType bloodType;
