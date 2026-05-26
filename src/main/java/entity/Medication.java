@@ -4,10 +4,7 @@ import entity.enums.MedicationForm;
 import entity.enums.MedicationType;
 
 import javax.persistence.*;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "medication")
@@ -32,9 +29,11 @@ public class Medication {
     @Column(name = "dose", nullable = false)
     private String dose;
 
+    @ElementCollection(targetClass = MedicationType.class)
+    @CollectionTable(name = "medication_type_mapping", joinColumns = @JoinColumn(name = "medication_id"))
     @Column(name = "medication_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private MedicationType medicationType;
+    private Set<MedicationType> medicationTypes = new HashSet<>();
 
     @Column(name = "administration_route")
     private String administrationRoute;
@@ -48,45 +47,54 @@ public class Medication {
     @Column(name = "duration_day")
     private Integer durationDay;
 
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "medication_medical_notes",
+            joinColumns = @JoinColumn(name = "medication_id"),
+            inverseJoinColumns = @JoinColumn(name = "medical_notes_id")
+    )
+    private List<MedicalNotes> medicalNotes = new ArrayList<MedicalNotes>();
+
     public Medication() {
     }
 
-    public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, MedicationType medicationType, String storageConditions, String administrationRoute) {
+    public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, String storageConditions, String administrationRoute) {
         setName(name);
         if (activeIngredient != null) {
             this.activeIngredient.addAll(activeIngredient);
         }
         setMedicationForm(medicationForm);
         setDose(dose);
-        setMedicationType(medicationType);
         setAdministrationRoute(administrationRoute);
         setStorageConditions(storageConditions);
+        this.medicationTypes.add(MedicationType.CLINICAL);
     }
 
-    public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, MedicationType medicationType, String frequency, Integer durationDay) {
+    public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, String frequency, Integer durationDay) {
         setName(name);
         if (activeIngredient != null) {
             this.activeIngredient.addAll(activeIngredient);
         }
         setMedicationForm(medicationForm);
         setDose(dose);
-        setMedicationType(medicationType);
         setFrequency(frequency);
         setDurationDay(durationDay);
+        this.medicationTypes.add(MedicationType.PRESCRIBED);
     }
 
-    public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, MedicationType medicationType, String administrationRoute, String storageConditions, String frequency, Integer durationDay) {
+    public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, String administrationRoute, String storageConditions, String frequency, Integer durationDay) {
         setName(name);
         if (activeIngredient != null) {
             this.activeIngredient.addAll(activeIngredient);
         }
         setMedicationForm(medicationForm);
         setDose(dose);
-        setMedicationType(medicationType);
         setAdministrationRoute(administrationRoute);
         setStorageConditions(storageConditions);
         setFrequency(frequency);
         setDurationDay(durationDay);
+        this.medicationTypes.add(MedicationType.CLINICAL);
+        this.medicationTypes.add(MedicationType.PRESCRIBED);
     }
 
     public Long getId() {
@@ -109,8 +117,8 @@ public class Medication {
         return dose;
     }
 
-    public MedicationType getMedicationType() {
-        return medicationType;
+    public Set<MedicationType> getMedicationTypes() {
+        return Collections.unmodifiableSet(medicationTypes);
     }
 
     public String getAdministrationRoute() {
@@ -156,24 +164,72 @@ public class Medication {
         this.dose = dose;
     }
 
-    public void setMedicationType(MedicationType medicationType) {
-        Objects.requireNonNull(medicationType, "Setter medicationType must not be null");
-        this.medicationType = medicationType;
+    public void addMedicationType(MedicationType type) {
+        if (type != null) {
+            this.medicationTypes.add(type);
+        }
     }
 
     public void setAdministrationRoute(String administrationRoute) {
+        if (!this.medicationTypes.contains(MedicationType.CLINICAL)) {
+            throw new IllegalStateException("This is not a CLINICAL medication");
+        }
         this.administrationRoute = administrationRoute;
     }
 
     public void setStorageConditions(String storageConditions) {
+        if (!this.medicationTypes.contains(MedicationType.CLINICAL)) {
+            throw new IllegalStateException("This is not a CLINICAL medication");
+        }
         this.storageConditions = storageConditions;
     }
 
     public void setFrequency(String frequency) {
+        if (!this.medicationTypes.contains(MedicationType.PRESCRIBED)) {
+            throw new IllegalStateException("This is not a PRESCRIBED medication");
+        }
         this.frequency = frequency;
     }
 
     public void setDurationDay(Integer durationDay) {
+        if (!this.medicationTypes.contains(MedicationType.PRESCRIBED)) {
+            throw new IllegalStateException("This is not a PRESCRIBED medication");
+        }
         this.durationDay = durationDay;
+    }
+
+    public List<MedicalNotes> getMedicalNotes() {
+        return Collections.unmodifiableList(medicalNotes);
+    }
+
+    public void addMedicalNotes(MedicalNotes medicalNotes) {
+        Objects.requireNonNull(medicalNotes, "Add medication cannot be null");
+        if (!this.medicalNotes.contains(medicalNotes)) {
+            this.medicalNotes.add(medicalNotes);
+            medicalNotes.addMedication(this);
+        }
+    }
+
+    public void removeMedicalNotes(MedicalNotes medicalNotes) {
+        Objects.requireNonNull(medicalNotes, "remove medication cannot be null");
+        if (this.medicalNotes.contains(medicalNotes)) {
+            this.medicalNotes.remove(medicalNotes);
+            medicalNotes.removeMedication(this);
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Medication)) return false;
+        Medication medication = (Medication) o;
+        return Objects.equals(name, medication.name)
+                && Objects.equals(medicationForm, medication.medicationForm)
+                && Objects.equals(dose, medication.dose);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, medicationForm, dose);
     }
 }

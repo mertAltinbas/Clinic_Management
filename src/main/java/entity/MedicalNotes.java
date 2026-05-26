@@ -2,10 +2,7 @@ package entity;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "medical_notes")
@@ -25,6 +22,10 @@ public class MedicalNotes {
 
     @Column(name = "creation_date", nullable = false)
     private LocalDate creationDate;
+
+    @ManyToMany(mappedBy = "medicalNotes")
+    private List<Medication> medications = new ArrayList<>();
+
 
     public MedicalNotes() {
     }
@@ -73,5 +74,39 @@ public class MedicalNotes {
     public void setCreationDate(LocalDate creationDate) {
         Objects.requireNonNull(creationDate, "Set creation Date is null");
         this.creationDate = creationDate;
+    }
+
+    public List<Medication> getMedications() {
+        return Collections.unmodifiableList(medications);
+    }
+
+    public void addMedication(Medication medication) {
+        Objects.requireNonNull(medication, "Add medication is null");
+        if (!medications.contains(medication)) {
+            this.medications.add(medication);
+            medication.addMedicalNotes(this);
+        }
+    }
+
+    public void removeMedication(Medication medication) {
+        Objects.requireNonNull(medication, "Remove medication is null");
+        if (medications.contains(medication)) {
+            this.medications.remove(medication);
+            medication.removeMedicalNotes(this);
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MedicalNotes)) return false;
+        MedicalNotes that = (MedicalNotes) o;
+        return Objects.equals(treatment, that.treatment)
+                && Objects.equals(creationDate, that.creationDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(treatment, creationDate);
     }
 }
