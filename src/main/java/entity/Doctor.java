@@ -1,8 +1,6 @@
 package entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Set;
@@ -16,13 +14,18 @@ public class Doctor extends Employee {
     @Column(name = "consultation_fee", nullable = false)
     private float consultationFee;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "specialization_id")
+    private Specialization specialization;
+
     public Doctor() {
     }
 
-    public Doctor(String employeeCode, String name, String middleName, String surname, Set<String> phoneNumber, BigDecimal salary, String shift, String licenseNumber, float consultationFee) {
+    public Doctor(String employeeCode, String name, String middleName, String surname, Set<String> phoneNumber, BigDecimal salary, String shift, String licenseNumber, float consultationFee, Specialization specialization) {
         super(employeeCode, name, middleName, surname, phoneNumber, salary, shift);
         setLicenseNumber(licenseNumber);
         setConsultationFee(consultationFee);
+        setSpecialization(specialization);
     }
 
     public String getLicenseNumber() {
@@ -46,5 +49,14 @@ public class Doctor extends Employee {
     public BigDecimal calculateBonus() {
         /* TODO */
         return new BigDecimal("1");
+    }
+
+    public Specialization getSpecialization() {
+        return specialization;
+    }
+
+    public void setSpecialization(Specialization specialization) {
+        if (this.specialization == specialization) return;
+        this.specialization = specialization;
     }
 }

@@ -1,6 +1,7 @@
 package entity;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -83,6 +84,30 @@ public class Department {
             this.employees.remove(employee);
             employee.removeDepartment(this);
         }
+    }
+
+    public List<Employee> getAvailableStaffs(String shift) {
+        Objects.requireNonNull(shift, "Shift cannot be null");
+        List<Employee> availableStaffs = new ArrayList<>();
+
+        for (Employee emp : employees) {
+            if (shift.equalsIgnoreCase(emp.getShift())) {
+                availableStaffs.add(emp);
+            }
+        }
+        return availableStaffs;
+    }
+
+    public void generateMonthlyPayroll() {
+        BigDecimal totalDepartmentCost = BigDecimal.ZERO;
+
+        for (Employee emp : employees) {
+            BigDecimal bonus = emp.calculateBonus();
+            BigDecimal totalPayment = emp.getSalary().add(bonus);
+            totalDepartmentCost = totalDepartmentCost.add(totalPayment);
+        }
+
+        System.out.println("Total Payroll Cost for " + this.departmentName + ": " + totalDepartmentCost);
     }
 
     @Override
