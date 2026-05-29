@@ -35,6 +35,9 @@ public class Appointment {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Invoice invoice;
+
     public Appointment() {
     }
 
@@ -108,5 +111,17 @@ public class Appointment {
     public void setPatient(Patient patient) {
         if (this.patient == patient) return;
         this.patient = patient;
+    }
+
+    public Invoice getInvoice() {
+        return invoice;
+    }
+
+    public void setInvoice(Invoice invoice) {
+        if (this.invoice == invoice) return;
+        this.invoice = invoice;
+        if (invoice != null) {
+            invoice.setAppointment(this);
+        }
     }
 }

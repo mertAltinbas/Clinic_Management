@@ -26,16 +26,20 @@ public class MedicalNotes {
     @ManyToMany(mappedBy = "medicalNotes")
     private List<Medication> medications = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
 
     public MedicalNotes() {
     }
 
-    public MedicalNotes(Set<String> diagnosis, String treatment, LocalDate creationDate) {
+    public MedicalNotes(Set<String> diagnosis, String treatment, LocalDate creationDate, Patient patient) {
         if (diagnosis != null) {
             this.diagnosis.addAll(diagnosis);
         }
         setTreatment(treatment);
         setCreationDate(creationDate);
+        setPatient(patient);
     }
 
     public Long getId() {
@@ -94,6 +98,15 @@ public class MedicalNotes {
             this.medications.remove(medication);
             medication.removeMedicalNotes(this);
         }
+    }
+
+    public Patient getPatient() {
+        return patient;
+    }
+
+    public void setPatient(Patient patient) {
+        if (this.patient == patient) return;
+        this.patient = patient;
     }
 
     @Override

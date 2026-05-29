@@ -41,6 +41,9 @@ public class Patient {
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Appointment> appointments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MedicalNotes> medicalNotes = new ArrayList<>();
+
     public Patient() {}
 
     public Patient(String firstName, String lastName, LocalDate dateOfBirth, Set<String> phoneNumber, Address homeAddress, BloodType bloodType) {
@@ -160,6 +163,26 @@ public class Patient {
         if (this.appointments.contains(appointment)) {
             this.appointments.remove(appointment);
             appointment.setPatient(null);
+        }
+    }
+
+    public List<MedicalNotes> getMedicalNotes() {
+        return Collections.unmodifiableList(medicalNotes);
+    }
+
+    public void addMedicalNote(MedicalNotes note) {
+        Objects.requireNonNull(note, "Medical note cannot be null");
+        if (!this.medicalNotes.contains(note)) {
+            this.medicalNotes.add(note);
+            note.setPatient(this);
+        }
+    }
+
+    public void removeMedicalNote(MedicalNotes note) {
+        Objects.requireNonNull(note, "Medical note cannot be null");
+        if (this.medicalNotes.contains(note)) {
+            this.medicalNotes.remove(note);
+            note.setPatient(null);
         }
     }
 }

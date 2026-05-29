@@ -27,14 +27,19 @@ public class Invoice {
     @Column(name = "vat_rate", nullable = false)
     private Float vatRate;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "appointment_id", nullable = false, unique = true)
+    private Appointment appointment;
+
     public Invoice() {}
 
-    public Invoice(String invoiceId, BigDecimal totalAmount, LocalDate issueDate, Boolean isPaid, Float vatRate) {
+    public Invoice(String invoiceId, BigDecimal totalAmount, LocalDate issueDate, Boolean isPaid, Float vatRate,  Appointment appointment) {
         setInvoiceId(invoiceId);
         setTotalAmount(totalAmount);
         setIssueDate(issueDate);
         setPaid(isPaid);
         setVatRate(vatRate);
+        setAppointment(appointment);
     }
 
     public Long getId() {
@@ -84,5 +89,14 @@ public class Invoice {
     public void setVatRate(Float vatRate) {
         Objects.requireNonNull(vatRate, "Setter vatRate cannot be null");
         this.vatRate = vatRate;
+    }
+
+    public Appointment getAppointment() {
+        return appointment;
+    }
+
+    public void setAppointment(Appointment appointment) {
+        if (this.appointment == appointment) return;
+        this.appointment = appointment;
     }
 }
