@@ -17,6 +17,9 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "appointment_id", nullable = false, unique = true)
+    private String appointmentId;
+
     @Column(name = "date", nullable = false)
     private LocalDateTime dateTime;
 
@@ -41,14 +44,16 @@ public class Appointment {
     public Appointment() {
     }
 
-    public Appointment(LocalDateTime dateTime, StatusType status, Doctor doctor, Patient patient) {
+    public Appointment(String appointmentId, LocalDateTime dateTime, StatusType status, Doctor doctor, Patient patient) {
+        setAppointmentId(appointmentId);
         setDateTime(dateTime);
         setStatus(status);
         setDoctor(doctor);
         setPatient(patient);
     }
 
-    public Appointment(LocalDateTime dateTime, StatusType status, Doctor doctor, Patient patient, String note) {
+    public Appointment(String appointmentId, LocalDateTime dateTime, StatusType status, Doctor doctor, Patient patient, String note) {
+        setAppointmentId(appointmentId);
         setDateTime(dateTime);
         setStatus(status);
         setDoctor(doctor);
@@ -58,6 +63,10 @@ public class Appointment {
 
     public Long getId() {
         return id;
+    }
+
+    public String getAppointmentId() {
+        return appointmentId;
     }
 
     public LocalDateTime getDateTime() {
@@ -70,6 +79,10 @@ public class Appointment {
 
     public String getNote() {
         return note;
+    }
+
+    public void setAppointmentId(String appointmentId) {
+        this.appointmentId = appointmentId;
     }
 
     public void setDateTime(LocalDateTime dateTime) {
@@ -130,11 +143,11 @@ public class Appointment {
         if (this == o) return true;
         if (!(o instanceof Appointment)) return false;
         Appointment that = (Appointment) o;
-        return Objects.equals(getDateTime(), that.getDateTime()) && Objects.equals(getStatus(), that.getStatus());
+        return Objects.equals(getAppointmentId(), that.getAppointmentId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getDateTime(), getStatus());
+        return Objects.hash(appointmentId);
     }
 }

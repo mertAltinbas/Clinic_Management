@@ -17,9 +17,6 @@ public class Patient {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "appointment_id", nullable = false, unique = true)
-    private String appointmentId;
-
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
@@ -50,8 +47,7 @@ public class Patient {
     public Patient() {
     }
 
-    public Patient(String appointmentId, String firstName, String lastName, LocalDate dateOfBirth, Set<String> phoneNumber, Address homeAddress, BloodType bloodType) {
-        setAppointmentId(appointmentId);
+    public Patient(String firstName, String lastName, LocalDate dateOfBirth, Set<String> phoneNumber, Address homeAddress, BloodType bloodType) {
         setFirstName(firstName);
         setLastName(lastName);
         setDateOfBirth(dateOfBirth);
@@ -64,10 +60,6 @@ public class Patient {
 
     public Long getId() {
         return id;
-    }
-
-    public String getAppointmentId() {
-        return appointmentId;
     }
 
     public String getFirstName() {
@@ -96,11 +88,6 @@ public class Patient {
 
     public int getAge() {
         return Period.between(dateOfBirth, LocalDate.now()).getYears();
-    }
-
-    public void setAppointmentId(String appointmentId) {
-        Objects.requireNonNull(appointmentId, "Setter appointmentId cannot be null");
-        this.appointmentId = appointmentId;
     }
 
     public void setFirstName(String firstName) {
@@ -140,21 +127,21 @@ public class Patient {
         this.bloodType = bloodType;
     }
 
-    public void scheduleAppointment(Doctor doc, LocalDateTime dateTime) {
+    public void scheduleAppointment(Doctor doc, String appointmentId, LocalDateTime dateTime) {
         Objects.requireNonNull(doc, "Doctor cannot be null");
         Objects.requireNonNull(dateTime, "DateTime cannot be null");
 
-        Appointment newAppointment = new Appointment(dateTime, StatusType.SCHEDULED, doc, this);
+        Appointment newAppointment = new Appointment(appointmentId, dateTime, StatusType.SCHEDULED, doc, this);
 
         this.addAppointment(newAppointment);
         doc.addAppointment(newAppointment);
     }
 
-    public void scheduleAppointment(Doctor doc, LocalDateTime dateTime, String note) {
+    public void scheduleAppointment(Doctor doc, String appointmentId, LocalDateTime dateTime, String note) {
         Objects.requireNonNull(doc, "Doctor cannot be null");
         Objects.requireNonNull(dateTime, "DateTime cannot be null");
 
-        Appointment newAppointment = new Appointment(dateTime, StatusType.SCHEDULED, doc, this, note);
+        Appointment newAppointment = new Appointment(appointmentId, dateTime, StatusType.SCHEDULED, doc, this, note);
 
         this.addAppointment(newAppointment);
         doc.addAppointment(newAppointment);
@@ -205,11 +192,14 @@ public class Patient {
         if (this == o) return true;
         if (!(o instanceof Patient)) return false;
         Patient patient = (Patient) o;
-        return Objects.equals(appointmentId, patient.appointmentId);
+        return Objects.equals(getFirstName(), patient.getFirstName()) &&
+                Objects.equals(getLastName(), patient.getLastName()) &&
+                Objects.equals(getDateOfBirth(), patient.getDateOfBirth()) &&
+                Objects.equals(getBloodType(), patient.getBloodType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(appointmentId);
+        return Objects.hash(getFirstName(), getLastName(), getDateOfBirth(), getBloodType());
     }
 }
