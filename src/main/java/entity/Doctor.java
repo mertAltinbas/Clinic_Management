@@ -2,8 +2,7 @@ package entity;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "doctor")
@@ -17,6 +16,9 @@ public class Doctor extends Employee {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "specialization_id")
     private Specialization specialization;
+
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Appointment> appointments = new ArrayList<>();
 
     public Doctor() {
     }
@@ -58,5 +60,25 @@ public class Doctor extends Employee {
     public void setSpecialization(Specialization specialization) {
         if (this.specialization == specialization) return;
         this.specialization = specialization;
+    }
+
+    public List<Appointment> getAppointments() {
+        return Collections.unmodifiableList(appointments);
+    }
+
+    public void addAppointment(Appointment appointment) {
+        Objects.requireNonNull(appointment, "Appointment cannot be null");
+        if (!this.appointments.contains(appointment)) {
+            this.appointments.add(appointment);
+            appointment.setDoctor(this);
+        }
+    }
+
+    public void removeAppointment(Appointment appointment) {
+        Objects.requireNonNull(appointment, "Appointment cannot be null");
+        if (this.appointments.contains(appointment)) {
+            this.appointments.remove(appointment);
+            appointment.setDoctor(null);
+        }
     }
 }

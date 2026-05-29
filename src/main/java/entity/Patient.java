@@ -1,14 +1,13 @@
 package entity;
 
 import entity.enums.BloodType;
+import entity.enums.StatusType;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "patient")
@@ -38,6 +37,9 @@ public class Patient {
     @Column(name = "blood_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private BloodType bloodType;
+
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Appointment> appointments = new ArrayList<>();
 
     public Patient() {}
 
@@ -119,5 +121,45 @@ public class Patient {
     public void setBloodType(BloodType bloodType) {
         Objects.requireNonNull(bloodType, "Setter bloodType must not be null");
         this.bloodType = bloodType;
+    }
+
+    public void scheduleAppointment(Doctor doc, LocalDateTime dateTime) {
+        Objects.requireNonNull(doc, "Doctor cannot be null");
+        Objects.requireNonNull(dateTime, "DateTime cannot be null");
+
+        Appointment newAppointment = new Appointment(dateTime, StatusType.SCHEDULED, doc, this);
+
+        this.addAppointment(newAppointment);
+        doc.addAppointment(newAppointment);
+    }
+
+    public void scheduleAppointment(Doctor doc, LocalDateTime dateTime, String note) {
+        Objects.requireNonNull(doc, "Doctor cannot be null");
+        Objects.requireNonNull(dateTime, "DateTime cannot be null");
+
+        Appointment newAppointment = new Appointment(dateTime, StatusType.SCHEDULED, doc, this, note);
+
+        this.addAppointment(newAppointment);
+        doc.addAppointment(newAppointment);
+    }
+
+    public List<Appointment> getAppointments() {
+        return Collections.unmodifiableList(appointments);
+    }
+
+    public void addAppointment(Appointment appointment) {
+        Objects.requireNonNull(appointment, "Appointment cannot be null");
+        if (!this.appointments.contains(appointment)) {
+            this.appointments.add(appointment);
+            appointment.setPatient(this);
+        }
+    }
+
+    public void removeAppointment(Appointment appointment) {
+        Objects.requireNonNull(appointment, "Appointment cannot be null");
+        if (this.appointments.contains(appointment)) {
+            this.appointments.remove(appointment);
+            appointment.setPatient(null);
+        }
     }
 }

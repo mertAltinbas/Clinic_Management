@@ -4,7 +4,11 @@ import entity.enums.StatusType;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "appointment")
@@ -14,39 +18,70 @@ public class Appointment {
     private Long id;
 
     @Column(name = "date", nullable = false)
-    private LocalDate date;
+    private LocalDateTime dateTime;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private StatusType status;
 
-    public Appointment() {}
+    @Column(name = "note")
+    private String note;
 
-    public Appointment(LocalDate date, StatusType status) {
-        setDate(date);
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "doctor_id", nullable = false)
+    private Doctor doctor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
+
+    public Appointment() {
+    }
+
+    public Appointment(LocalDateTime dateTime, StatusType status, Doctor doctor, Patient patient) {
+        setDateTime(dateTime);
         setStatus(status);
+        setDoctor(doctor);
+        setPatient(patient);
+    }
+
+    public Appointment(LocalDateTime dateTime, StatusType status, Doctor doctor, Patient patient, String note) {
+        setDateTime(dateTime);
+        setStatus(status);
+        setDoctor(doctor);
+        setPatient(patient);
+        this.note = note;
     }
 
     public Long getId() {
         return id;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDateTime getDateTime() {
+        return dateTime;
     }
 
     public StatusType getStatus() {
         return status;
     }
 
-    public void setDate(LocalDate date) {
-        Objects.requireNonNull(date, "setter date cannot be null");
-        this.date = date;
+    public String getNote() {
+        return note;
+    }
+
+    public void setDateTime(LocalDateTime dateTime) {
+        Objects.requireNonNull(dateTime, "setter date cannot be null");
+        this.dateTime = dateTime;
     }
 
     public void setStatus(StatusType status) {
         Objects.requireNonNull(status, "setter status cannot be null");
         this.status = status;
+    }
+
+    public void setNote(String note) {
+        Objects.requireNonNull(note, "setter note cannot be null");
+        this.note = note;
     }
 
     public void cancelAppointment() {
@@ -55,5 +90,23 @@ public class Appointment {
 
     public void updateStatus(StatusType nStatus) {
         this.status = nStatus;
+    }
+
+    public Doctor getDoctor() {
+        return doctor;
+    }
+
+    public void setDoctor(Doctor doctor) {
+        if (this.doctor == doctor) return;
+        this.doctor = doctor;
+    }
+
+    public Patient getPatient() {
+        return patient;
+    }
+
+    public void setPatient(Patient patient) {
+        if (this.patient == patient) return;
+        this.patient = patient;
     }
 }
