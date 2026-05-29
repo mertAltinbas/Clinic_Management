@@ -99,4 +99,17 @@ public class Invoice {
         if (this.appointment == appointment) return;
         this.appointment = appointment;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Invoice)) return false;
+        Invoice that = (Invoice) o;
+        return Objects.equals(getInvoiceId(), that.getInvoiceId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getInvoiceId());
+    }
 }

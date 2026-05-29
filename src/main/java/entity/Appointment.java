@@ -124,4 +124,17 @@ public class Appointment {
             invoice.setAppointment(this);
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Appointment)) return false;
+        Appointment that = (Appointment) o;
+        return Objects.equals(getDateTime(), that.getDateTime()) && Objects.equals(getStatus(), that.getStatus());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getDateTime(), getStatus());
+    }
 }

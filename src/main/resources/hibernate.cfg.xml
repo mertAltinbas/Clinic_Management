@@ -20,7 +20,6 @@
         <mapping class="entity.Medication"/>
         <mapping class="entity.MedicalNotes"/>
         <mapping class="entity.Department"/>
-        <mapping class="entity.Address"/>
         <mapping class="entity.Patient"/>
         <mapping class="entity.Employee"/>
         <mapping class="entity.Appointment"/>
