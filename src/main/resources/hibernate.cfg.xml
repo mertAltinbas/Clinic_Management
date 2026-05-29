@@ -17,7 +17,17 @@
         <property name="hbm2ddl.auto">update</property>
 
         <!-- Full names the annotated entity class -->
-        <mapping class="Doctor"/>
+        <mapping class="entity.Medication"/>
+        <mapping class="entity.MedicalNotes"/>
+        <mapping class="entity.Department"/>
+        <mapping class="entity.Address"/>
+        <mapping class="entity.Patient"/>
+        <mapping class="entity.Employee"/>
+        <mapping class="entity.Appointment"/>
+        <mapping class="entity.Doctor"/>
+        <mapping class="entity.Invoice"/>
+        <mapping class="entity.Nurse"/>
+        <mapping class="entity.Specialization"/>
 
     </session-factory>
 </hibernate-configuration>

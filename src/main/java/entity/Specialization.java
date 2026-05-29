@@ -17,8 +17,9 @@ public class Specialization {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @OneToMany
-    Map<String, Doctor> doctorsMap = new HashMap<>();
+    @OneToMany(mappedBy = "specialization", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @MapKey(name = "licenseNumber")
+    private Map<String, Doctor> doctorsMap = new HashMap<>();
 
     public Specialization() {
     }
