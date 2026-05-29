@@ -17,6 +17,9 @@ public class Patient {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "appointment_id", nullable = false, unique = true)
+    private String appointmentId;
+
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
@@ -44,9 +47,11 @@ public class Patient {
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MedicalNotes> medicalNotes = new ArrayList<>();
 
-    public Patient() {}
+    public Patient() {
+    }
 
-    public Patient(String firstName, String lastName, LocalDate dateOfBirth, Set<String> phoneNumber, Address homeAddress, BloodType bloodType) {
+    public Patient(String appointmentId, String firstName, String lastName, LocalDate dateOfBirth, Set<String> phoneNumber, Address homeAddress, BloodType bloodType) {
+        setAppointmentId(appointmentId);
         setFirstName(firstName);
         setLastName(lastName);
         setDateOfBirth(dateOfBirth);
@@ -59,6 +64,10 @@ public class Patient {
 
     public Long getId() {
         return id;
+    }
+
+    public String getAppointmentId() {
+        return appointmentId;
     }
 
     public String getFirstName() {
@@ -87,6 +96,11 @@ public class Patient {
 
     public int getAge() {
         return Period.between(dateOfBirth, LocalDate.now()).getYears();
+    }
+
+    public void setAppointmentId(String appointmentId) {
+        Objects.requireNonNull(appointmentId, "Setter appointmentId cannot be null");
+        this.appointmentId = appointmentId;
     }
 
     public void setFirstName(String firstName) {
@@ -184,5 +198,18 @@ public class Patient {
             this.medicalNotes.remove(note);
             note.setPatient(null);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Patient)) return false;
+        Patient patient = (Patient) o;
+        return Objects.equals(appointmentId, patient.appointmentId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(appointmentId);
     }
 }
