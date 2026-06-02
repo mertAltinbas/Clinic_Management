@@ -52,15 +52,6 @@ public class Medication {
     @Column(name = "max_dispense_quantity")
     private int maxDispenseQuantity;
 
-    // Associations
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-            name = "medication_medical_notes",
-            joinColumns = @JoinColumn(name = "medication_id"),
-            inverseJoinColumns = @JoinColumn(name = "medical_notes_id")
-    )
-    private List<MedicalNotes> medicalNotes = new ArrayList<MedicalNotes>();
-
     @OneToMany(mappedBy = "medication", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MedicationOrder> medicationOrder = new ArrayList<>();
 
@@ -217,26 +208,6 @@ public class Medication {
     }
 
     // associations
-    public List<MedicalNotes> getMedicalNotes() {
-        return Collections.unmodifiableList(medicalNotes);
-    }
-
-    public void addMedicalNotes(MedicalNotes medicalNotes) {
-        Objects.requireNonNull(medicalNotes, "Add medication cannot be null");
-        if (!this.medicalNotes.contains(medicalNotes)) {
-            this.medicalNotes.add(medicalNotes);
-            medicalNotes.addMedication(this);
-        }
-    }
-
-    public void removeMedicalNotes(MedicalNotes medicalNotes) {
-        Objects.requireNonNull(medicalNotes, "remove medication cannot be null");
-        if (this.medicalNotes.contains(medicalNotes)) {
-            this.medicalNotes.remove(medicalNotes);
-            medicalNotes.removeMedication(this);
-        }
-    }
-
     public List<MedicationOrder> getMedicationOrder() {
         return Collections.unmodifiableList(medicationOrder);
     }

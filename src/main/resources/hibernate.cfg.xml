@@ -27,6 +27,7 @@
         <mapping class="entity.Invoice"/>
         <mapping class="entity.Nurse"/>
         <mapping class="entity.Specialization"/>
-
+        <mapping class="entity.SickNote"/>
+        <mapping class="entity.MedicationOrder"/>
     </session-factory>
 </hibernate-configuration>

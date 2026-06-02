@@ -27,8 +27,9 @@ public class MedicationOrder {
 
     public MedicationOrder() {}
 
-    public MedicationOrder(String name, String frequency, int durationDay) {
-
+    public MedicationOrder(String frequency, int durationDay) {
+        setFrequency(frequency);
+        setDurationDay(durationDay);
     }
 
     public Long getId() {

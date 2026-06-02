@@ -3,6 +3,7 @@ package entity;
 import entity.enums.StatusType;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -40,6 +41,9 @@ public class Appointment {
 
     @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
     private Invoice invoice;
+
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private MedicalNotes medicalNotes;
 
     public Appointment() {
     }
@@ -108,9 +112,18 @@ public class Appointment {
         this.status = nStatus;
     }
 
-    public void generateInvoice(){
-        float consultationFee = doctor.getConsultationFee();
-        new Invoice();
+    public void generateInvoice() {
+        if (this.doctor == null) {
+            throw new IllegalStateException("There should be one doctor at least.");
+        }
+
+        float fee = this.doctor.getConsultationFee();
+        Float vatRate = 0.20f;
+        BigDecimal totalAmt = BigDecimal.valueOf(fee + (fee * vatRate));
+        String generatedInvoiceId = "INV-" + this.appointmentId;
+
+        Invoice newInvoice = new Invoice(generatedInvoiceId, totalAmt, LocalDate.now(), false, vatRate, this);
+        this.setInvoice(newInvoice);
     }
 
     public Doctor getDoctor() {
@@ -140,6 +153,18 @@ public class Appointment {
         this.invoice = invoice;
         if (invoice != null) {
             invoice.setAppointment(this);
+        }
+    }
+
+    public MedicalNotes getMedicalNotes() {
+        return medicalNotes;
+    }
+
+    public void setMedicalNotes(MedicalNotes medicalNotes) {
+        if (this.medicalNotes == medicalNotes) return;
+        this.medicalNotes = medicalNotes;
+        if (medicalNotes != null) {
+            medicalNotes.setAppointment(this);
         }
     }
 

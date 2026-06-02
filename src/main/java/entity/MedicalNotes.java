@@ -23,9 +23,7 @@ public class MedicalNotes {
     @Column(name = "creation_date", nullable = false)
     private LocalDate creationDate;
 
-    @ManyToMany(mappedBy = "medicalNotes")
-    private List<Medication> medications = new ArrayList<>();
-
+    // associations
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
@@ -36,16 +34,21 @@ public class MedicalNotes {
     @OneToMany(mappedBy = "medicalNotes", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MedicationOrder> medicationOrder = new ArrayList<>();
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "appointment_id", nullable = false, unique = true)
+    private Appointment appointment;
+
     public MedicalNotes() {
     }
 
-    public MedicalNotes(Set<String> diagnosis, String treatment, LocalDate creationDate, Patient patient) {
+    public MedicalNotes(Set<String> diagnosis, String treatment, LocalDate creationDate, Patient patient, Appointment appointment) {
         if (diagnosis != null) {
             this.diagnosis.addAll(diagnosis);
         }
         setTreatment(treatment);
         setCreationDate(creationDate);
         setPatient(patient);
+        setAppointment(appointment);
     }
 
     public Long getId() {
@@ -86,26 +89,6 @@ public class MedicalNotes {
         this.creationDate = creationDate;
     }
 
-    public List<Medication> getMedications() {
-        return Collections.unmodifiableList(medications);
-    }
-
-    public void addMedication(Medication medication) {
-        Objects.requireNonNull(medication, "Add medication is null");
-        if (!medications.contains(medication)) {
-            this.medications.add(medication);
-            medication.addMedicalNotes(this);
-        }
-    }
-
-    public void removeMedication(Medication medication) {
-        Objects.requireNonNull(medication, "Remove medication is null");
-        if (medications.contains(medication)) {
-            this.medications.remove(medication);
-            medication.removeMedicalNotes(this);
-        }
-    }
-
     public Patient getPatient() {
         return patient;
     }
@@ -143,6 +126,15 @@ public class MedicalNotes {
             this.medicationOrder.remove(medicationOrder);
             medicationOrder.setMedicalNotes(null);
         }
+    }
+
+    public Appointment getAppointment() {
+        return appointment;
+    }
+
+    public void setAppointment(Appointment appointment) {
+        if (this.appointment == appointment) return;
+        this.appointment = appointment;
     }
 
     @Override

@@ -50,8 +50,16 @@ public class Doctor extends Employee {
 
     @Override
     public BigDecimal calculateBonus() {
-        /* TODO */
-        return new BigDecimal("1");
+        BigDecimal totalBonus = BigDecimal.ZERO;
+        BigDecimal fee = BigDecimal.valueOf(consultationFee);
+        BigDecimal bonusRate = new BigDecimal("0.10");
+
+        for (Appointment app : appointments) {
+            if (app.getStatus() == entity.enums.StatusType.COMPLETED) {
+                totalBonus = totalBonus.add(fee.multiply(bonusRate));
+            }
+        }
+        return getSalary().add(totalBonus);
     }
 
     public void scheduleFollowUp(Patient patient, LocalDateTime dateTime) {
@@ -60,7 +68,14 @@ public class Doctor extends Employee {
     }
 
     public boolean checkSchedule(LocalDateTime dateTime){
-        /* todo */
+        if (dateTime == null) return false;
+
+        for (Appointment app : appointments) {
+            if (app.getDateTime().equals(dateTime) &&
+                    (app.getStatus() == entity.enums.StatusType.SCHEDULED || app.getStatus() == entity.enums.StatusType.RESCHEDULED)) {
+                return false;
+            }
+        }
         return true;
     }
 
