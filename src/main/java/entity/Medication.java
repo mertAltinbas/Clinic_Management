@@ -1,5 +1,6 @@
 package entity;
 
+import entity.enums.ColorCode;
 import entity.enums.MedicationForm;
 import entity.enums.MedicationType;
 
@@ -41,12 +42,17 @@ public class Medication {
     @Column(name = "storage_conditions")
     private String storageConditions;
 
-    @Column(name = "frequency")
-    private String frequency;
+    @Column(name = "prescription_category")
+    @Enumerated(EnumType.STRING)
+    private ColorCode prescriptionCategory;
 
-    @Column(name = "duration_day")
-    private Integer durationDay;
+    @Column(name = "is_otc")
+    private boolean isOtc;
 
+    @Column(name = "max_dispense_quantity")
+    private int maxDispenseQuantity;
+
+    // Associations
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "medication_medical_notes",
@@ -54,6 +60,9 @@ public class Medication {
             inverseJoinColumns = @JoinColumn(name = "medical_notes_id")
     )
     private List<MedicalNotes> medicalNotes = new ArrayList<MedicalNotes>();
+
+    @OneToMany(mappedBy = "medication", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MedicationOrder> medicationOrder = new ArrayList<>();
 
     public Medication() {
     }
@@ -70,7 +79,7 @@ public class Medication {
         setStorageConditions(storageConditions);
     }
 
-    public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, String frequency, Integer durationDay) {
+    public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, ColorCode prescriptionCategory, boolean isOtc, int maxDispenseQuantity) {
         setName(name);
         if (activeIngredient != null) {
             this.activeIngredient.addAll(activeIngredient);
@@ -78,11 +87,12 @@ public class Medication {
         setMedicationForm(medicationForm);
         setDose(dose);
         this.medicationTypes.add(MedicationType.PRESCRIBED);
-        setFrequency(frequency);
-        setDurationDay(durationDay);
+        setPrescriptionCategory(prescriptionCategory);
+        setOtc(isOtc);
+        setMaxDispenseQuantity(maxDispenseQuantity);
     }
 
-    public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, String administrationRoute, String storageConditions, String frequency, Integer durationDay) {
+    public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, String administrationRoute, String storageConditions, ColorCode prescriptionCategory, boolean isOtc, int maxDispenseQuantity) {
         setName(name);
         if (activeIngredient != null) {
             this.activeIngredient.addAll(activeIngredient);
@@ -93,8 +103,9 @@ public class Medication {
         this.medicationTypes.add(MedicationType.PRESCRIBED);
         setAdministrationRoute(administrationRoute);
         setStorageConditions(storageConditions);
-        setFrequency(frequency);
-        setDurationDay(durationDay);
+        setPrescriptionCategory(prescriptionCategory);
+        setOtc(isOtc);
+        setMaxDispenseQuantity(maxDispenseQuantity);
     }
 
     public Long getId() {
@@ -129,12 +140,16 @@ public class Medication {
         return storageConditions;
     }
 
-    public String getFrequency() {
-        return frequency;
+    public ColorCode getPrescriptionCategory() {
+        return prescriptionCategory;
     }
 
-    public Integer getDurationDay() {
-        return durationDay;
+    public boolean isOtc() {
+        return isOtc;
+    }
+
+    public int getMaxDispenseQuantity() {
+        return maxDispenseQuantity;
     }
 
     public void setName(String name) {
@@ -186,22 +201,19 @@ public class Medication {
         medicationTypes.add(MedicationType.CLINICAL);
     }
 
-    public void setFrequency(String frequency) {
-        if (!this.medicationTypes.contains(MedicationType.PRESCRIBED)) {
-            throw new IllegalStateException("This is not a PRESCRIBED medication");
-        }
-        this.frequency = frequency;
-        medicationTypes.add(MedicationType.PRESCRIBED);
+    public void setOtc(boolean otc) {
+        isOtc = otc;
     }
 
-    public void setDurationDay(Integer durationDay) {
-        if (!this.medicationTypes.contains(MedicationType.PRESCRIBED)) {
-            throw new IllegalStateException("This is not a PRESCRIBED medication");
-        }
-        this.durationDay = durationDay;
-        medicationTypes.add(MedicationType.PRESCRIBED);
+    public void setMaxDispenseQuantity(int maxDispenseQuantity) {
+        this.maxDispenseQuantity = maxDispenseQuantity;
     }
 
+    public void setPrescriptionCategory(ColorCode prescriptionCategory) {
+        this.prescriptionCategory = prescriptionCategory;
+    }
+
+    // associations
     public List<MedicalNotes> getMedicalNotes() {
         return Collections.unmodifiableList(medicalNotes);
     }
@@ -219,6 +231,26 @@ public class Medication {
         if (this.medicalNotes.contains(medicalNotes)) {
             this.medicalNotes.remove(medicalNotes);
             medicalNotes.removeMedication(this);
+        }
+    }
+
+    public List<MedicationOrder> getMedicationOrder() {
+        return Collections.unmodifiableList(medicationOrder);
+    }
+
+    public void addMedicationOrder(MedicationOrder medicationOrder) {
+        Objects.requireNonNull(medicationOrder, "Add medicationOrder cannot be null");
+        if (!this.medicationOrder.contains(medicationOrder)) {
+            this.medicationOrder.add(medicationOrder);
+            medicationOrder.setMedication(this);
+        }
+    }
+
+    public void removeMedicationOrder(MedicationOrder medicationOrder) {
+        Objects.requireNonNull(medicationOrder, "remove medicationOrder cannot be null");
+        if (this.medicationOrder.contains(medicationOrder)) {
+            this.medicationOrder.remove(medicationOrder);
+            medicationOrder.setMedication(null);
         }
     }
 

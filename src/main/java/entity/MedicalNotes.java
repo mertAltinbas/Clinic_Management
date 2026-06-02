@@ -30,6 +30,12 @@ public class MedicalNotes {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
+    @OneToOne(mappedBy = "medicalNotes", cascade = CascadeType.ALL, orphanRemoval = true)
+    private SickNote sickNote;
+
+    @OneToMany(mappedBy = "medicalNotes", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MedicationOrder> medicationOrder = new ArrayList<>();
+
     public MedicalNotes() {
     }
 
@@ -107,6 +113,36 @@ public class MedicalNotes {
     public void setPatient(Patient patient) {
         if (this.patient == patient) return;
         this.patient = patient;
+    }
+
+    public SickNote getSickNote() {
+        return sickNote;
+    }
+
+    public void setSickNote(SickNote sickNote) {
+        if (this.sickNote == sickNote) return;
+        this.sickNote = sickNote;
+        if (sickNote != null) sickNote.setMedicalNotes(this);
+    }
+
+    public List<MedicationOrder> getMedicationOrders() {
+        return Collections.unmodifiableList(medicationOrder);
+    }
+
+    public void addMedicationOrder(MedicationOrder medicationOrder) {
+        Objects.requireNonNull(medicationOrder, "medicationOrder cannot be null");
+        if (!this.medicationOrder.contains(medicationOrder)) {
+            this.medicationOrder.add(medicationOrder);
+            medicationOrder.setMedicalNotes(this);
+        }
+    }
+
+    public void removeMedicationOrder(MedicationOrder medicationOrder) {
+        Objects.requireNonNull(medicationOrder, "Appointment cannot be null");
+        if (this.medicationOrder.contains(medicationOrder)) {
+            this.medicationOrder.remove(medicationOrder);
+            medicationOrder.setMedicalNotes(null);
+        }
     }
 
     @Override
