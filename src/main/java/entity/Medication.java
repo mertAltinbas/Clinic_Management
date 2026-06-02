@@ -65,9 +65,9 @@ public class Medication {
         }
         setMedicationForm(medicationForm);
         setDose(dose);
+        this.medicationTypes.add(MedicationType.CLINICAL);
         setAdministrationRoute(administrationRoute);
         setStorageConditions(storageConditions);
-        this.medicationTypes.add(MedicationType.CLINICAL);
     }
 
     public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, String frequency, Integer durationDay) {
@@ -77,9 +77,9 @@ public class Medication {
         }
         setMedicationForm(medicationForm);
         setDose(dose);
+        this.medicationTypes.add(MedicationType.PRESCRIBED);
         setFrequency(frequency);
         setDurationDay(durationDay);
-        this.medicationTypes.add(MedicationType.PRESCRIBED);
     }
 
     public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, String administrationRoute, String storageConditions, String frequency, Integer durationDay) {
@@ -89,12 +89,12 @@ public class Medication {
         }
         setMedicationForm(medicationForm);
         setDose(dose);
+        this.medicationTypes.add(MedicationType.CLINICAL);
+        this.medicationTypes.add(MedicationType.PRESCRIBED);
         setAdministrationRoute(administrationRoute);
         setStorageConditions(storageConditions);
         setFrequency(frequency);
         setDurationDay(durationDay);
-        this.medicationTypes.add(MedicationType.CLINICAL);
-        this.medicationTypes.add(MedicationType.PRESCRIBED);
     }
 
     public Long getId() {
@@ -175,6 +175,7 @@ public class Medication {
             throw new IllegalStateException("This is not a CLINICAL medication");
         }
         this.administrationRoute = administrationRoute;
+        medicationTypes.add(MedicationType.CLINICAL);
     }
 
     public void setStorageConditions(String storageConditions) {
@@ -182,6 +183,7 @@ public class Medication {
             throw new IllegalStateException("This is not a CLINICAL medication");
         }
         this.storageConditions = storageConditions;
+        medicationTypes.add(MedicationType.CLINICAL);
     }
 
     public void setFrequency(String frequency) {
@@ -189,6 +191,7 @@ public class Medication {
             throw new IllegalStateException("This is not a PRESCRIBED medication");
         }
         this.frequency = frequency;
+        medicationTypes.add(MedicationType.PRESCRIBED);
     }
 
     public void setDurationDay(Integer durationDay) {
@@ -196,6 +199,7 @@ public class Medication {
             throw new IllegalStateException("This is not a PRESCRIBED medication");
         }
         this.durationDay = durationDay;
+        medicationTypes.add(MedicationType.PRESCRIBED);
     }
 
     public List<MedicalNotes> getMedicalNotes() {

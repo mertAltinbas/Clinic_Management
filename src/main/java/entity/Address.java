@@ -23,7 +23,7 @@ public class Address {
 
     public Address() {}
 
-    public Address(String country, String region, String city, String street, String streetNum, String apartmentNum, String postalCode) {
+    public Address(String country, String city, String street, String apartmentNum, String postalCode) {
         setCountry(country);
         setCity(city);
         setStreet(street);
