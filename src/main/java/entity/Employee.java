@@ -52,9 +52,9 @@ public abstract class Employee {
         setName(name);
         setMiddleName(middleName);
         setSurname(surname);
-        if (phoneNumber != null) {
-            this.phoneNumber.addAll(phoneNumber);
-        }
+        if (phoneNumber == null || phoneNumber.isEmpty())
+            throw new IllegalArgumentException("Employee must have at least one phone number.");
+        this.phoneNumber.addAll(phoneNumber);
         setSalary(salary);
         setShift(shift);
     }
@@ -118,6 +118,9 @@ public abstract class Employee {
 
     public void removePhoneNumber(String phoneNumber) {
         if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
+            if (this.phoneNumber.size() <= 1) {
+                throw new IllegalStateException("Cannot remove the last phone number. Employee must have at least one [1..*].");
+            }
             this.phoneNumber.remove(phoneNumber);
         }
     }

@@ -108,6 +108,11 @@ public class Appointment {
         this.status = nStatus;
     }
 
+    public void generateInvoice(){
+        float consultationFee = doctor.getConsultationFee();
+        new Invoice();
+    }
+
     public Doctor getDoctor() {
         return doctor;
     }

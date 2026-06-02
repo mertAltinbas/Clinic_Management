@@ -69,9 +69,9 @@ public class Medication {
 
     public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, String storageConditions, String administrationRoute) {
         setName(name);
-        if (activeIngredient != null) {
-            this.activeIngredient.addAll(activeIngredient);
-        }
+        if (activeIngredient == null || activeIngredient.isEmpty())
+            throw new IllegalArgumentException("Medication must have at least one active ingredient.");
+        this.activeIngredient.addAll(activeIngredient);
         setMedicationForm(medicationForm);
         setDose(dose);
         this.medicationTypes.add(MedicationType.CLINICAL);
@@ -81,9 +81,9 @@ public class Medication {
 
     public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, ColorCode prescriptionCategory, boolean isOtc, int maxDispenseQuantity) {
         setName(name);
-        if (activeIngredient != null) {
-            this.activeIngredient.addAll(activeIngredient);
-        }
+        if (activeIngredient == null || activeIngredient.isEmpty())
+            throw new IllegalArgumentException("Medication must have at least one active ingredient.");
+        this.activeIngredient.addAll(activeIngredient);
         setMedicationForm(medicationForm);
         setDose(dose);
         this.medicationTypes.add(MedicationType.PRESCRIBED);
@@ -94,9 +94,9 @@ public class Medication {
 
     public Medication(String name, Set<String> activeIngredient, MedicationForm medicationForm, String dose, String administrationRoute, String storageConditions, ColorCode prescriptionCategory, boolean isOtc, int maxDispenseQuantity) {
         setName(name);
-        if (activeIngredient != null) {
-            this.activeIngredient.addAll(activeIngredient);
-        }
+        if (activeIngredient == null || activeIngredient.isEmpty())
+            throw new IllegalArgumentException("Medication must have at least one active ingredient.");
+        this.activeIngredient.addAll(activeIngredient);
         setMedicationForm(medicationForm);
         setDose(dose);
         this.medicationTypes.add(MedicationType.CLINICAL);
@@ -165,6 +165,9 @@ public class Medication {
 
     public void removeActiveIngredient(String activeIngredient) {
         if (activeIngredient != null && !activeIngredient.trim().isEmpty()) {
+            if (this.activeIngredient.size() <= 1 && this.activeIngredient.contains(activeIngredient)) {
+                throw new IllegalStateException("Cannot remove the last active ingredient. Medication must have at least one.");
+            }
             this.activeIngredient.remove(activeIngredient);
         }
     }

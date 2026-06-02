@@ -2,6 +2,7 @@ package entity;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -51,6 +52,16 @@ public class Doctor extends Employee {
     public BigDecimal calculateBonus() {
         /* TODO */
         return new BigDecimal("1");
+    }
+
+    public void scheduleFollowUp(Patient patient, LocalDateTime dateTime) {
+        String uniqueAppointmentId = "followup-" + UUID.randomUUID().toString();
+        patient.scheduleAppointment(this, uniqueAppointmentId, dateTime);
+    }
+
+    public boolean checkSchedule(LocalDateTime dateTime){
+        /* todo */
+        return true;
     }
 
     public Specialization getSpecialization() {
