@@ -124,22 +124,37 @@ public class Medication {
     }
 
     public String getAdministrationRoute() {
+        if (!this.medicationTypes.contains(MedicationType.CLINICAL)) {
+            throw new IllegalStateException("This is not a CLINICAL medication");
+        }
         return administrationRoute;
     }
 
     public String getStorageConditions() {
+        if (!this.medicationTypes.contains(MedicationType.CLINICAL)) {
+            throw new IllegalStateException("This is not a CLINICAL medication");
+        }
         return storageConditions;
     }
 
     public ColorCode getPrescriptionCategory() {
+        if (!this.medicationTypes.contains(MedicationType.PRESCRIBED)) {
+            throw new IllegalStateException("This is not a PRESCRIBED medication");
+        }
         return prescriptionCategory;
     }
 
     public boolean isOtc() {
+        if (!this.medicationTypes.contains(MedicationType.PRESCRIBED)) {
+            throw new IllegalStateException("This is not a PRESCRIBED medication");
+        }
         return isOtc;
     }
 
     public int getMaxDispenseQuantity() {
+        if (!this.medicationTypes.contains(MedicationType.PRESCRIBED)) {
+            throw new IllegalStateException("This is not a PRESCRIBED medication");
+        }
         return maxDispenseQuantity;
     }
 
@@ -180,31 +195,28 @@ public class Medication {
     }
 
     public void setAdministrationRoute(String administrationRoute) {
-        if (!this.medicationTypes.contains(MedicationType.CLINICAL)) {
-            throw new IllegalStateException("This is not a CLINICAL medication");
-        }
         this.administrationRoute = administrationRoute;
         medicationTypes.add(MedicationType.CLINICAL);
     }
 
     public void setStorageConditions(String storageConditions) {
-        if (!this.medicationTypes.contains(MedicationType.CLINICAL)) {
-            throw new IllegalStateException("This is not a CLINICAL medication");
-        }
         this.storageConditions = storageConditions;
         medicationTypes.add(MedicationType.CLINICAL);
     }
 
     public void setOtc(boolean otc) {
         isOtc = otc;
+        medicationTypes.add(MedicationType.PRESCRIBED);
     }
 
     public void setMaxDispenseQuantity(int maxDispenseQuantity) {
         this.maxDispenseQuantity = maxDispenseQuantity;
+        medicationTypes.add(MedicationType.PRESCRIBED);
     }
 
     public void setPrescriptionCategory(ColorCode prescriptionCategory) {
         this.prescriptionCategory = prescriptionCategory;
+        medicationTypes.add(MedicationType.PRESCRIBED);
     }
 
     // associations
