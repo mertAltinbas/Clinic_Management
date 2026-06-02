@@ -62,9 +62,9 @@ public class Doctor extends Employee {
         return getSalary().add(totalBonus);
     }
 
-    public void scheduleFollowUp(Patient patient, LocalDateTime dateTime) {
+    public void scheduleFollowUp(Patient patient, LocalDateTime dateTime, String note) {
         String uniqueAppointmentId = "followup-" + UUID.randomUUID().toString();
-        patient.scheduleAppointment(this, uniqueAppointmentId, dateTime);
+        patient.scheduleAppointment(this, uniqueAppointmentId, dateTime, note);
     }
 
     public boolean checkSchedule(LocalDateTime dateTime){

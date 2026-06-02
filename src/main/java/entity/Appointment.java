@@ -113,13 +113,14 @@ public class Appointment {
     }
 
     public void generateInvoice() {
-        if (this.doctor == null) {
-            throw new IllegalStateException("There should be one doctor at least.");
-        }
+        if (this.doctor == null) throw new IllegalStateException("There should be one doctor at least.");
 
-        float fee = this.doctor.getConsultationFee();
+        BigDecimal fee = BigDecimal.valueOf(this.doctor.getConsultationFee());
         Float vatRate = 0.20f;
-        BigDecimal totalAmt = BigDecimal.valueOf(fee + (fee * vatRate));
+
+        BigDecimal vatMultiplier = BigDecimal.ONE.add(BigDecimal.valueOf(vatRate));
+        BigDecimal totalAmt = fee.multiply(vatMultiplier);
+
         String generatedInvoiceId = "INV-" + this.appointmentId;
 
         Invoice newInvoice = new Invoice(generatedInvoiceId, totalAmt, LocalDate.now(), false, vatRate, this);

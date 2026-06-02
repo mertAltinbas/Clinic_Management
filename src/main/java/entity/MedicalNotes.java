@@ -89,6 +89,17 @@ public class MedicalNotes {
         this.creationDate = creationDate;
     }
 
+    public void addPrescription(Medication med, String freq, int duration) {
+        Objects.requireNonNull(med, "Medication cannot be null");
+        Objects.requireNonNull(freq, "Frequency cannot be null");
+
+        MedicationOrder order = new MedicationOrder(freq, duration);
+        order.setMedication(med);
+
+        this.addMedicationOrder(order);
+        med.addMedicationOrder(order);
+    }
+
     public Patient getPatient() {
         return patient;
     }

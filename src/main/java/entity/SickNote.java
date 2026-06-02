@@ -18,8 +18,8 @@ public class SickNote {
     @Column(name = "rest_days", nullable = false)
     private int restDays;
 
-    @Column(name = "issue_day", nullable = false)
-    private LocalDateTime issueDay;
+    @Column(name = "issue_date", nullable = false)
+    private LocalDateTime issueDate;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "medical_notes_id", nullable = false, unique = true)
@@ -28,10 +28,10 @@ public class SickNote {
     public SickNote() {
     }
 
-    public SickNote(String documentId, int restDays, LocalDateTime issueDay) {
+    public SickNote(String documentId, int restDays, LocalDateTime issueDate) {
         setDocumentId(documentId);
         setRestDays(restDays);
-        setIssueDay(issueDay);
+        setIssueDay(issueDate);
     }
 
     public Long getId() {
@@ -47,7 +47,7 @@ public class SickNote {
     }
 
     public LocalDateTime getIssueDay() {
-        return issueDay;
+        return issueDate;
     }
 
     public void setDocumentId(String documentId) {
@@ -59,9 +59,9 @@ public class SickNote {
         this.restDays = restDays;
     }
 
-    public void setIssueDay(LocalDateTime issueDay) {
-        Objects.requireNonNull(issueDay, "Setter issueDay is null");
-        this.issueDay = issueDay;
+    public void setIssueDay(LocalDateTime issueDate) {
+        Objects.requireNonNull(issueDate, "Setter issueDay is null");
+        this.issueDate = issueDate;
     }
 
     public MedicalNotes getMedicalNotes() {
