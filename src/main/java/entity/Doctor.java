@@ -18,7 +18,7 @@ public class Doctor extends Employee {
     @JoinColumn(name = "specialization_id")
     private Specialization specialization;
 
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "doctor", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Appointment> appointments = new ArrayList<>();
 
     public Doctor() {

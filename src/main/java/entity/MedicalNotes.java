@@ -28,10 +28,10 @@ public class MedicalNotes {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    @OneToOne(mappedBy = "medicalNotes", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "medicalNotes", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private SickNote sickNote;
 
-    @OneToMany(mappedBy = "medicalNotes", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "medicalNotes", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<MedicationOrder> medicationOrder = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY)
