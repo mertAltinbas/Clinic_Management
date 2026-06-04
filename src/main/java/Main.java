@@ -1,4 +1,5 @@
 import gui.DoctorDashboard;
+import util.DataSeeder;
 import util.HibernateUtil;
 
 import javax.swing.*;
@@ -7,6 +8,8 @@ import java.awt.event.WindowEvent;
 
 public class Main {
     public static void main(String[] args) {
+        DataSeeder.seedDataIfEmpty();
+
         SwingUtilities.invokeLater(() -> {
             DoctorDashboard dashboard = new DoctorDashboard();
             dashboard.setVisible(true);

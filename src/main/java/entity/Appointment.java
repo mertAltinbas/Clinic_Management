@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -167,6 +168,14 @@ public class Appointment {
         if (medicalNotes != null) {
             medicalNotes.setAppointment(this);
         }
+    }
+
+    @Override
+    public String toString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        String pName = (patient != null) ? patient.getFirstName() + " " + patient.getLastName() : "Unknown";
+        String statusStr = status.name().charAt(0) + status.name().substring(1).toLowerCase();
+        return dateTime.format(formatter) + " - " + pName + " (" + statusStr + ")";
     }
 
     @Override
