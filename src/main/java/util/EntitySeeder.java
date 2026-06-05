@@ -10,12 +10,10 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.sql.ordering.antlr.Factory;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 
 public class EntitySeeder {
@@ -46,7 +44,6 @@ public class EntitySeeder {
             Address addr13 = new Address("Poland", "Torun", "Szeroka", "9", "87-100");
             Address addr14 = new Address("Poland", "Zakopane", "Krupowki", "22", "34-500");
             Address addr15 = new Address("Poland", "Warsaw", "Aleje Jerozolimskie", "100", "00-807");
-
 
             // Departments
             Department cardiologyDepartment = new Department("Cardiology Department", 1, "CARD-01");
@@ -106,6 +103,17 @@ public class EntitySeeder {
             Nurse nurse9 = new Nurse("NUR-1009", "Ivy", "", "Poison", Set.of("+48 999 999 999"), new BigDecimal("5400"), "Day", Set.of("Dermatology Care"), "Dermatology", true);
             Nurse nurse10 = new Nurse("NUR-1010", "Jack", "", "Sparrow", Set.of("+48 000 000 000"), new BigDecimal("5600"), "Night", Set.of("Radiology Safety"), "Radiology", false);
 
+            nurse1.addDepartment(emergencyDepartment);
+            nurse2.addDepartment(intensiveCareDepartment);
+            nurse3.addDepartment(pediatricsDepartment);
+            nurse4.addDepartment(surgeryDepartment);
+            nurse5.addDepartment(neurologyDepartment);
+            nurse6.addDepartment(orthopedicsDepartment);
+            nurse7.addDepartment(cardiologyDepartment);
+            nurse8.addDepartment(psychiatryDepartment);
+            nurse9.addDepartment(dermatologyDepartment);
+            nurse10.addDepartment(radiologyDepartment);
+
             session.persist(nurse1);
             session.persist(nurse2);
             session.persist(nurse3);
@@ -133,6 +141,22 @@ public class EntitySeeder {
             Doctor doc13 = new Doctor("DOC-2013", "Temperance", "", "Brennan", Set.of("+48 701 701 701"), new BigDecimal("14500"), "Day", "LIC-013", 400.0f, orthoSpec);
             Doctor doc14 = new Doctor("DOC-2014", "Michaela", "", "Quinn", Set.of("+48 801 801 801"), new BigDecimal("10000"), "Night", "LIC-014", 100.0f, pediSpec);
             Doctor doc15 = new Doctor("DOC-2015", "Beverly", "", "Crusher", Set.of("+48 901 901 901"), new BigDecimal("15500"), "Day", "LIC-015", 400.0f, icuSpec);
+
+            doc1.addDepartment(cardiologyDepartment); cardioSpec.addDoctor(doc1);
+            doc2.addDepartment(cardiologyDepartment); cardioSpec.addDoctor(doc2);
+            doc3.addDepartment(cardiologyDepartment); cardioSpec.addDoctor(doc3);
+            doc4.addDepartment(cardiologyDepartment); cardioSpec.addDoctor(doc4);
+            doc5.addDepartment(cardiologyDepartment); cardioSpec.addDoctor(doc5);
+            doc6.addDepartment(neurologyDepartment); neuroSpec.addDoctor(doc6);
+            doc7.addDepartment(neurologyDepartment); neuroSpec.addDoctor(doc7);
+            doc8.addDepartment(surgeryDepartment); surgSpec.addDoctor(doc8);
+            doc9.addDepartment(surgeryDepartment); surgSpec.addDoctor(doc9);
+            doc10.addDepartment(psychiatryDepartment); psychSpec.addDoctor(doc10);
+            doc11.addDepartment(radiologyDepartment); radioSpec.addDoctor(doc11);
+            doc12.addDepartment(emergencyDepartment); emerSpec.addDoctor(doc12);
+            doc13.addDepartment(orthopedicsDepartment); orthoSpec.addDoctor(doc13);
+            doc14.addDepartment(pediatricsDepartment); pediSpec.addDoctor(doc14);
+            doc15.addDepartment(intensiveCareDepartment); icuSpec.addDoctor(doc15);
 
             session.persist(doc1);
             session.persist(doc2);
@@ -231,6 +255,24 @@ public class EntitySeeder {
             Appointment app16 = new Appointment("APP-016", twoDaysLater.withHour(9).withMinute(0), StatusType.SCHEDULED, doc1, pat15);
             Appointment app17 = new Appointment("APP-017", twoDaysLater.withHour(9).withMinute(30), StatusType.RESCHEDULED, doc1, pat3, "Patient called to reschedule after missing today's slot.");
 
+            doc1.addAppointment(app1); pat1.addAppointment(app1);
+            doc1.addAppointment(app2); pat2.addAppointment(app2);
+            doc1.addAppointment(app3); pat3.addAppointment(app3);
+            doc1.addAppointment(app4); pat4.addAppointment(app4);
+            doc1.addAppointment(app5); pat5.addAppointment(app5);
+            doc1.addAppointment(app6); pat6.addAppointment(app6);
+            doc1.addAppointment(app7); pat7.addAppointment(app7);
+            doc1.addAppointment(app8); pat8.addAppointment(app8);
+            doc1.addAppointment(app9); pat9.addAppointment(app9);
+            doc1.addAppointment(app10); pat10.addAppointment(app10);
+            doc1.addAppointment(app11); pat11.addAppointment(app11);
+            doc1.addAppointment(app12); pat12.addAppointment(app12);
+            doc1.addAppointment(app13); pat13.addAppointment(app13);
+            doc1.addAppointment(app14); pat6.addAppointment(app14);
+            doc1.addAppointment(app15); pat14.addAppointment(app15);
+            doc1.addAppointment(app16); pat15.addAppointment(app16);
+            doc1.addAppointment(app17); pat3.addAppointment(app17);
+
             session.persist(app1);
             session.persist(app2);
             session.persist(app3);
@@ -272,6 +314,24 @@ public class EntitySeeder {
             Invoice inv16 = new Invoice("INV-016", new BigDecimal("600.00"), twoDaysLaterDate, false, 0.08f, app16);
             Invoice inv17 = new Invoice("INV-017", new BigDecimal("150.00"), twoDaysLaterDate, false, 0.08f, app17);
 
+            app1.setInvoice(inv1);
+            app2.setInvoice(inv2);
+            app3.setInvoice(inv3);
+            app4.setInvoice(inv4);
+            app5.setInvoice(inv5);
+            app6.setInvoice(inv6);
+            app7.setInvoice(inv7);
+            app8.setInvoice(inv8);
+            app9.setInvoice(inv9);
+            app10.setInvoice(inv10);
+            app11.setInvoice(inv11);
+            app12.setInvoice(inv12);
+            app13.setInvoice(inv13);
+            app14.setInvoice(inv14);
+            app15.setInvoice(inv15);
+            app16.setInvoice(inv16);
+            app17.setInvoice(inv17);
+
             session.persist(inv1);
             session.persist(inv2);
             session.persist(inv3);
@@ -290,7 +350,7 @@ public class EntitySeeder {
             session.persist(inv16);
             session.persist(inv17);
 
-            // MedicalNotes
+            // MedicalNotes & Past Appointments
             LocalDate pastDate1 = todayDate.minusMonths(6);
             LocalDate pastDate2 = todayDate.minusMonths(2);
             LocalDate pastDate3 = todayDate.minusWeeks(3);
@@ -298,6 +358,10 @@ public class EntitySeeder {
             Appointment pastApp1 = new Appointment("APP-PAST-1", pastDate1.atTime(10, 0), StatusType.COMPLETED, doc1, pat1);
             Appointment pastApp2 = new Appointment("APP-PAST-2", pastDate2.atTime(14, 30), StatusType.COMPLETED, doc1, pat2);
             Appointment pastApp3 = new Appointment("APP-PAST-3", pastDate3.atTime(11, 0), StatusType.COMPLETED, doc1, pat5);
+
+            doc1.addAppointment(pastApp1); pat1.addAppointment(pastApp1);
+            doc1.addAppointment(pastApp2); pat2.addAppointment(pastApp2);
+            doc1.addAppointment(pastApp3); pat5.addAppointment(pastApp3);
 
             session.persist(pastApp1);
             session.persist(pastApp2);
@@ -310,6 +374,14 @@ public class EntitySeeder {
             MedicalNotes note6 = new MedicalNotes(Set.of("Chest Pain"), "ECG ordered, preliminary check", pastDate3, pat5, pastApp3);
             MedicalNotes note7 = new MedicalNotes(Set.of("Arrhythmia", "Palpitations"), "Holter monitor scheduled for 24 hours", todayDate, pat5, app5);
             MedicalNotes note8 = new MedicalNotes(Set.of("Post-op Recovery"), "Healing well, staples removed", todayDate, pat9, app8);
+
+            pat1.addMedicalNote(note1); pastApp1.setMedicalNotes(note1);
+            pat1.addMedicalNote(note2); app1.setMedicalNotes(note2);
+            pat2.addMedicalNote(note3); pastApp2.setMedicalNotes(note3);
+            pat2.addMedicalNote(note4); app2.setMedicalNotes(note4);
+            pat5.addMedicalNote(note6); pastApp3.setMedicalNotes(note6);
+            pat5.addMedicalNote(note7); app5.setMedicalNotes(note7);
+            pat9.addMedicalNote(note8); app8.setMedicalNotes(note8);
 
             session.persist(note1);
             session.persist(note2);
@@ -324,25 +396,26 @@ public class EntitySeeder {
             LocalDateTime pastDateTime3 = pastDate3.atTime(11, 30);
 
             SickNote sickNote1 = new SickNote("SN-001", 3, pastDateTime2);
-            sickNote1.setMedicalNotes(note3);
+            note3.setSickNote(sickNote1);
+
             SickNote sickNote2 = new SickNote("SN-002", 5, pastDateTime3);
-            sickNote2.setMedicalNotes(note6);
+            note6.setSickNote(sickNote2);
 
             session.persist(sickNote1);
             session.persist(sickNote2);
 
             // Medication Order
             MedicationOrder order1 = new MedicationOrder("Once a day", 30);
-            order1.setMedicalNotes(note2);
-            order1.setMedication(prescribedMedication1);
+            note2.addMedicationOrder(order1);
+            prescribedMedication1.addMedicationOrder(order1);
 
             MedicationOrder order2 = new MedicationOrder("Twice a day as needed", 5);
-            order2.setMedicalNotes(note4);
-            order2.setMedication(prescribedMedication2);
+            note4.addMedicationOrder(order2);
+            prescribedMedication2.addMedicationOrder(order2);
 
             MedicationOrder order3 = new MedicationOrder("Once a day", 15);
-            order3.setMedicalNotes(note7);
-            order3.setMedication(prescribedMedication3);
+            note7.addMedicationOrder(order3);
+            prescribedMedication3.addMedicationOrder(order3);
 
             session.persist(order1);
             session.persist(order2);
