@@ -41,6 +41,7 @@ public class DoctorDashboard extends JFrame {
     private List<MedicationOrder> pendingMedicationOrders = new ArrayList<>();
     private List<Medication> pendingManualMedications = new ArrayList<>();
     private SickNote pendingSickNote = null;
+    private LocalDateTime pendingFollowUpDate = null;
 
     public DoctorDashboard() {
         setTitle("Doctor Dashboard");
@@ -161,6 +162,7 @@ public class DoctorDashboard extends JFrame {
                     pendingMedicationOrders.clear();
                     pendingManualMedications.clear();
                     pendingSickNote = null;
+                    pendingFollowUpDate = null;
                     try (Session session = HibernateUtil.getSessionFactory().openSession()) {
 
                         Appointment activeApp = (Appointment) session.merge(selectedApp);
@@ -228,7 +230,12 @@ public class DoctorDashboard extends JFrame {
         });
 
         scheduleFollowUpButton.addActionListener(e -> {
-            // TODO
+            Appointment selectedApp = appointmentJList.getSelectedValue();
+            if (selectedApp == null) {
+                JOptionPane.showMessageDialog(this, "Please select an appointment first.", "Warning", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            showScheduleFollowUpDialog();
         });
     }
 
@@ -313,6 +320,14 @@ public class DoctorDashboard extends JFrame {
                 session.persist(pendingSickNote);
             }
 
+            if (pendingFollowUpDate != null) {
+                String generatedAppId = "APP-FU-" + System.currentTimeMillis();
+
+                Appointment followUpApp = new Appointment(generatedAppId, pendingFollowUpDate, StatusType.SCHEDULED, activeApp.getDoctor(), patient, "Follow-up scheduled after consultation.");
+
+                session.persist(followUpApp);
+            }
+
             transaction.commit();
 
             JOptionPane.showMessageDialog(this, "Consultation Completed and Saved Successfully!");
@@ -320,6 +335,7 @@ public class DoctorDashboard extends JFrame {
             if (pendingMedicationOrders != null) pendingMedicationOrders.clear();
             if (pendingManualMedications != null) pendingManualMedications.clear();
             pendingSickNote = null;
+            pendingFollowUpDate = null;
 
             appointmentListModel.removeElement(selectedApp);
             clearRightPanel();
@@ -480,6 +496,84 @@ public class DoctorDashboard extends JFrame {
             }
         });
         issueSickNoteDialog.setVisible(true);
+    }
+
+    private void showScheduleFollowUpDialog(){
+        JDialog dialog = new JDialog(this, "Schedule Follow Up", true);
+        dialog.setSize(400, 250);
+        dialog.setLayout(new BorderLayout());
+        dialog.setLocationRelativeTo(this);
+
+        JPanel centerPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+//        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+        JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+
+        JComboBox<Integer> dayCombo = new JComboBox<>();
+        for (int i = 1; i <= 31; i++) dayCombo.addItem(i);
+        JComboBox<Integer> monthCombo = new JComboBox<>();
+        for (int i = 1; i <= 12; i++) monthCombo.addItem(i);
+        JComboBox<Integer> yearCombo = new JComboBox<>();
+        int currentYear = LocalDate.now().getYear();
+        yearCombo.addItem(currentYear);
+        yearCombo.addItem(currentYear + 1);
+
+        datePanel.add(dayCombo);
+        datePanel.add(new JLabel("/"));
+        datePanel.add(monthCombo);
+        datePanel.add(new JLabel("/"));
+        datePanel.add(yearCombo);
+
+        JComboBox<String> hourCombo = new JComboBox<>();
+        for (int i = 8; i <= 18; i++) hourCombo.addItem(String.format("%02d", i));
+        JComboBox<String> minuteCombo = new JComboBox<>(new String[]{"00", "15", "30", "45"});
+
+        timePanel.add(hourCombo);
+        timePanel.add(new JLabel(":"));
+        timePanel.add(minuteCombo);
+
+        centerPanel.add(new JLabel("Select Date (DD/MM/YYYY):"));
+        centerPanel.add(datePanel);
+        centerPanel.add(new JLabel("Select Time (HH:MM):"));
+        centerPanel.add(timePanel);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        JButton scheduleButton = new JButton("Schedule");
+        JButton cancelButton = new JButton("Cancel");
+
+        buttonPanel.add(scheduleButton);
+        buttonPanel.add(cancelButton);
+
+        dialog.add(centerPanel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        cancelButton.addActionListener(e -> dialog.dispose());
+
+        scheduleButton.addActionListener(e -> {
+            try {
+                int day = (Integer) dayCombo.getSelectedItem();
+                int month = (Integer) monthCombo.getSelectedItem();
+                int year = (Integer) yearCombo.getSelectedItem();
+                int hour = Integer.parseInt((String) hourCombo.getSelectedItem());
+                int minute = Integer.parseInt((String) minuteCombo.getSelectedItem());
+
+                LocalDateTime selectedDateTime = LocalDateTime.of(year, month, day, hour, minute);
+
+                if (selectedDateTime.isBefore(LocalDateTime.now())) {
+                    JOptionPane.showMessageDialog(dialog, "Follow-up date cannot be in the past.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                pendingFollowUpDate = selectedDateTime;
+                JOptionPane.showMessageDialog(dialog, "Follow-up appointment added to the queue! It will be saved when you Complete Consultation.");
+                dialog.dispose();
+
+            } catch (java.time.DateTimeException ex) {
+                JOptionPane.showMessageDialog(dialog, "Invalid date selected (e.g., February 30). Please select a valid calendar date.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        dialog.setVisible(true);
     }
 
     private void clearRightPanel() {
