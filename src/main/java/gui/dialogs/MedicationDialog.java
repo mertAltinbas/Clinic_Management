@@ -23,8 +23,8 @@ public class MedicationDialog extends JDialog {
 
     public MedicationDialog(JFrame parent) {
         super(parent, "Prescribe Medication", true);
-        setSize(400, 300);
-        setLayout(new GridLayout(6, 2, 10, 10));
+        setSize(400, 350);
+        setLayout(new GridLayout(7, 2, 10, 10));
         setLocationRelativeTo(parent);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
@@ -41,7 +41,9 @@ public class MedicationDialog extends JDialog {
         JComboBox<Medication> medicationComboBox = new JComboBox<>(comboModel);
         JCheckBox manuelEntryCheckBox = new JCheckBox("Medication Not Found (Manual Entry)");
         JTextField manuelNameField = new JTextField("");
+        JTextField manuelDoseField = new JTextField("");
         manuelNameField.setEnabled(false);
+        manuelDoseField.setEnabled(false);
 
         JTextField frequencyField = new JTextField("2x1");
         JTextField durationDayField = new JTextField("7");
@@ -53,11 +55,13 @@ public class MedicationDialog extends JDialog {
             boolean isManual = manuelEntryCheckBox.isSelected();
             medicationComboBox.setEnabled(!isManual);
             manuelNameField.setEnabled(isManual);
+            manuelDoseField.setEnabled(isManual);
         });
 
         add(new JLabel("Select from Catalog:")); add(medicationComboBox);
         add(manuelEntryCheckBox); add(new JLabel(""));
         add(new JLabel("Manual Med Name:")); add(manuelNameField);
+        add(new JLabel("Manual Dose (e.g., 500mg):")); add(manuelDoseField);
         add(new JLabel("Frequency:")); add(frequencyField);
         add(new JLabel("Duration (Days):")); add(durationDayField);
         add(confirmButton); add(cancelButton);
@@ -85,12 +89,13 @@ public class MedicationDialog extends JDialog {
 
                 if (manuelEntryCheckBox.isSelected()) {
                     String manualName = manuelNameField.getText().trim();
-                    if (manualName.isEmpty()) {
-                        JOptionPane.showMessageDialog(this, "Please enter a manual medication name.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                    String manualDose = manuelDoseField.getText().trim();
+                    if (manualName.isEmpty() || manualDose.isEmpty()) {
+                        JOptionPane.showMessageDialog(this, "Please enter name and dose.", "Validation Error", JOptionPane.WARNING_MESSAGE);
                         return;
                     }
-                    selectedMedication = new Medication(manualName, Set.of("Unknown"), MedicationForm.TABLET, "Unknown", ColorCode.WHITE, true, durationDays);
-                    result.manualMedication = selectedMedication; // Manuel ilacı sonradan DB'ye yazmak için ekliyoruz
+                    selectedMedication = new Medication(manualName, Set.of("Unknown"), MedicationForm.TABLET, manualDose, ColorCode.WHITE, true, durationDays);
+                    result.manualMedication = selectedMedication;
                 } else {
                     selectedMedication = (Medication) medicationComboBox.getSelectedItem();
                 }

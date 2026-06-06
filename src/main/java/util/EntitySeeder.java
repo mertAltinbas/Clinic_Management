@@ -359,29 +359,40 @@ public class EntitySeeder {
             Appointment pastApp2 = new Appointment("APP-PAST-2", pastDate2.atTime(14, 30), StatusType.COMPLETED, doc1, pat2);
             Appointment pastApp3 = new Appointment("APP-PAST-3", pastDate3.atTime(11, 0), StatusType.COMPLETED, doc1, pat5);
 
+            Appointment pastApp4 = new Appointment("APP-PAST-4", pastDate2.minusDays(5).atTime(11, 0), StatusType.COMPLETED, doc1, pat2); // pat2'nin eski bir randevusu daha
+            Appointment pastApp7 = new Appointment("APP-PAST-7", pastDate3.minusDays(2).atTime(15, 30), StatusType.COMPLETED, doc1, pat5); // pat5'in eski bir randevusu daha
+            Appointment pastApp8 = new Appointment("APP-PAST-8", pastDate1.plusDays(10).atTime(9, 0), StatusType.COMPLETED, doc1, pat9); // pat9'un eski randevusu
+
             doc1.addAppointment(pastApp1); pat1.addAppointment(pastApp1);
             doc1.addAppointment(pastApp2); pat2.addAppointment(pastApp2);
             doc1.addAppointment(pastApp3); pat5.addAppointment(pastApp3);
 
+            doc1.addAppointment(pastApp4); pat2.addAppointment(pastApp4);
+            doc1.addAppointment(pastApp7); pat5.addAppointment(pastApp7);
+            doc1.addAppointment(pastApp8); pat9.addAppointment(pastApp8);
+
             session.persist(pastApp1);
             session.persist(pastApp2);
             session.persist(pastApp3);
+            session.persist(pastApp4);
+            session.persist(pastApp7);
+            session.persist(pastApp8);
 
             MedicalNotes note1 = new MedicalNotes(Set.of("Hypertension"), "Started blood pressure medication", pastDate1, pat1, pastApp1);
             MedicalNotes note2 = new MedicalNotes(Set.of("Type 2 Diabetes"), "Diet control and Metformin 500mg updated", todayDate, pat1, app1);
             MedicalNotes note3 = new MedicalNotes(Set.of("Migraine History"), "Reported frequent headaches, prescribed painkillers", pastDate2, pat2, pastApp2);
-            MedicalNotes note4 = new MedicalNotes(Set.of("Acute Migraine", "Vitamin D Deficiency"), "Sumatriptan 50mg prescribed. Vitamin D supplements 1000 IU daily", todayDate, pat2, app2);
+            MedicalNotes note4 = new MedicalNotes(Set.of("Acute Migraine", "Vitamin D Deficiency"), "Sumatriptan 50mg prescribed. Vitamin D supplements 1000 IU daily", todayDate, pat2, pastApp4);
             MedicalNotes note6 = new MedicalNotes(Set.of("Chest Pain"), "ECG ordered, preliminary check", pastDate3, pat5, pastApp3);
-            MedicalNotes note7 = new MedicalNotes(Set.of("Arrhythmia", "Palpitations"), "Holter monitor scheduled for 24 hours", todayDate, pat5, app5);
-            MedicalNotes note8 = new MedicalNotes(Set.of("Post-op Recovery"), "Healing well, staples removed", todayDate, pat9, app8);
+            MedicalNotes note7 = new MedicalNotes(Set.of("Arrhythmia", "Palpitations"), "Holter monitor scheduled for 24 hours", todayDate, pat5, pastApp7);
+            MedicalNotes note8 = new MedicalNotes(Set.of("Post-op Recovery"), "Healing well, staples removed", todayDate, pat9, pastApp8);
 
             pat1.addMedicalNote(note1); pastApp1.setMedicalNotes(note1);
             pat1.addMedicalNote(note2); app1.setMedicalNotes(note2);
             pat2.addMedicalNote(note3); pastApp2.setMedicalNotes(note3);
-            pat2.addMedicalNote(note4); app2.setMedicalNotes(note4);
+            pat2.addMedicalNote(note4); pastApp4.setMedicalNotes(note4);
             pat5.addMedicalNote(note6); pastApp3.setMedicalNotes(note6);
-            pat5.addMedicalNote(note7); app5.setMedicalNotes(note7);
-            pat9.addMedicalNote(note8); app8.setMedicalNotes(note8);
+            pat5.addMedicalNote(note7); pastApp7.setMedicalNotes(note7);
+            pat9.addMedicalNote(note8); pastApp8.setMedicalNotes(note8);
 
             session.persist(note1);
             session.persist(note2);
