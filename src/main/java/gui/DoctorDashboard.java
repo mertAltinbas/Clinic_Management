@@ -1,9 +1,8 @@
 package gui;
 
-import entity.Appointment;
-import entity.MedicalNotes;
-import entity.MedicationOrder;
-import entity.Patient;
+import entity.*;
+import entity.enums.ColorCode;
+import entity.enums.MedicationForm;
 import entity.enums.StatusType;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -12,7 +11,6 @@ import util.HibernateUtil;
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
@@ -38,11 +36,13 @@ public class DoctorDashboard extends JFrame {
     private JButton noShowButton;
     private JButton saveCompleteButton;
 
+    private List<MedicationOrder> pendingMedicationOrders = new ArrayList<>();
+    private List<Medication> pendingManualMedications = new ArrayList<>();
+
     public DoctorDashboard() {
         setTitle("Doctor Dashboard");
         setSize(1280, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // setLocationByPlatform(true);
 
         initUI();
         loadAppointments();
@@ -145,6 +145,8 @@ public class DoctorDashboard extends JFrame {
             if (!e.getValueIsAdjusting()) {
                 Appointment selectedApp = appointmentJList.getSelectedValue();
                 if (selectedApp != null) {
+                    pendingMedicationOrders.clear();
+                    pendingManualMedications.clear();
                     try (Session session = HibernateUtil.getSessionFactory().openSession()) {
 
                         Appointment activeApp = (Appointment) session.merge(selectedApp);
@@ -155,22 +157,22 @@ public class DoctorDashboard extends JFrame {
                         patientBloodTypeLabel.setText("Patient Blood Type: " + patient.getBloodType());
 
                         StringBuilder sb = new StringBuilder();
-                        List<entity.MedicalNotes> pastNotes = patient.getMedicalNotes();
+                        List<MedicalNotes> pastNotes = patient.getMedicalNotes();
 
                         if (pastNotes.isEmpty()) {
                             sb.append("No past medical notes found.");
                         } else {
-                            for (entity.MedicalNotes note : pastNotes) {
+                            for (MedicalNotes note : pastNotes) {
                                 sb.append("Date: ").append(note.getCreationDate()).append("\n");
                                 sb.append("Diagnosis: ").append(String.join(", ", note.getDiagnosis())).append("\n");
                                 sb.append("Treatment: ").append(note.getTreatment()).append("\n");
 
                                 sb.append("Medications: ");
-                                List<entity.MedicationOrder> orders = note.getMedicationOrders();
+                                List<MedicationOrder> orders = note.getMedicationOrders();
                                 if (orders.isEmpty()) {
                                     sb.append("None");
                                 } else {
-                                    for (entity.MedicationOrder order : orders) {
+                                    for (MedicationOrder order : orders) {
                                         sb.append(order.getMedication().getName())
                                                 .append(" (").append(order.getFrequency())
                                                 .append(", ").append(order.getDurationDay()).append(" days) ");
@@ -193,7 +195,13 @@ public class DoctorDashboard extends JFrame {
         saveCompleteButton.addActionListener(e -> handleSaveComplete());
 
         addMedicationButton.addActionListener(e -> {
-            // TODO
+            Appointment selectedApp = appointmentJList.getSelectedValue();
+            if (selectedApp == null) {
+                JOptionPane.showMessageDialog(this, "Please select an appointment first.", "Warning", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            showMedicationDialog();
         });
 
         issueSickNoteButton.addActionListener(e -> {
@@ -242,28 +250,47 @@ public class DoctorDashboard extends JFrame {
         String treatment = treatmentTextArea.getText().trim();
 
         if (diagnosis.isEmpty() || treatment.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Diagnosis and Treatment fields cannot be empty!", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Diagnosis or Treatment fields cannot be empty!", "Validation Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
 
-            Patient patient = selectedApp.getPatient();
+            Appointment activeApp = (Appointment) session.merge(selectedApp);
+            Patient patient = activeApp.getPatient();
 
             Set<String> diagnosisSet = new HashSet<>(Arrays.asList(diagnosis.split(",")));
-            MedicalNotes newNote = new MedicalNotes(diagnosisSet, treatment, LocalDate.now(), patient, selectedApp);
+            MedicalNotes newNote = new MedicalNotes(diagnosisSet, treatment, LocalDate.now(), patient, activeApp);
 
             patient.addMedicalNote(newNote);
-            selectedApp.setMedicalNotes(newNote);
-            selectedApp.updateStatus(StatusType.COMPLETED);
+            activeApp.setMedicalNotes(newNote);
+            activeApp.updateStatus(StatusType.COMPLETED);
 
             session.persist(newNote);
-            session.merge(selectedApp);
+            session.merge(activeApp);
+
+            for(Medication manualMed : pendingManualMedications) {
+                session.persist(manualMed);
+            }
+
+            for (MedicationOrder order : pendingMedicationOrders) {
+                Medication managedMed = (Medication) session.merge(order.getMedication());
+                order.setMedication(managedMed);
+
+                order.setMedicalNotes(newNote);
+                newNote.addMedicationOrder(order);
+                managedMed.addMedicationOrder(order);
+
+                session.persist(order);
+            }
 
             transaction.commit();
 
-            JOptionPane.showMessageDialog(this, "Saved Successfully");
+            JOptionPane.showMessageDialog(this, "Consultation Completed and Saved Successfully!");
+
+            pendingMedicationOrders.clear();
+            pendingManualMedications.clear();
             appointmentListModel.removeElement(selectedApp);
             clearRightPanel();
 
@@ -271,6 +298,71 @@ public class DoctorDashboard extends JFrame {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
         }
+    }
+
+    private void showMedicationDialog() {
+        JDialog medicationDialog = new JDialog(this, "Medication Dialog", true);
+        medicationDialog.setSize(400, 300);
+        medicationDialog.setLayout(new GridLayout(6, 2, 10, 10));
+        medicationDialog.setLocationRelativeTo(this);
+
+        DefaultComboBoxModel<Medication> medicationDefaultComboBoxModel = new DefaultComboBoxModel<>();
+
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            List<Medication> medications = session.createQuery("from Medication", Medication.class).list();
+            for (Medication medication : medications) {
+                medicationDefaultComboBoxModel.addElement(medication);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        JComboBox<Medication> medicationComboBox = new JComboBox<>(medicationDefaultComboBoxModel);
+        JCheckBox manuelEntryCheckBox = new JCheckBox("Medication Not Found (Manuel Entry)");
+        JTextField manuelMedicationNameField = new JTextField("");
+        manuelEntryCheckBox.setEnabled(false);
+
+        JTextField frequencyField = new JTextField("2x1");
+        JTextField durationDayField = new JTextField("7");
+
+        JButton confirmButton = new JButton("Confirm");
+        JButton cancelButton = new JButton("Cancel");
+
+        manuelEntryCheckBox.addActionListener(e -> {
+            boolean isManuelEntry = manuelEntryCheckBox.isSelected();
+            medicationComboBox.setEnabled(!isManuelEntry);
+            manuelMedicationNameField.setEnabled(isManuelEntry);
+        });
+
+        medicationDialog.add(new JLabel("Select from Catalog:")); medicationDialog.add(medicationComboBox);
+        medicationDialog.add(manuelEntryCheckBox); medicationDialog.add(new JLabel(""));
+        medicationDialog.add(new JLabel("Manual Med Name:")); medicationDialog.add(manuelMedicationNameField);
+        medicationDialog.add(new JLabel("Frequency:")); medicationDialog.add(frequencyField);
+        medicationDialog.add(new JLabel("Duration (Days):")); medicationDialog.add(durationDayField);
+        medicationDialog.add(confirmButton); medicationDialog.add(cancelButton);
+
+        cancelButton.addActionListener(e -> dispose());
+
+        confirmButton.addActionListener(e -> {
+            int durationDays =  Integer.parseInt(durationDayField.getText().trim());
+            Medication selectedMedication = null;
+
+            if (manuelEntryCheckBox.isSelected()) {
+                String manualName = manuelMedicationNameField.getText().trim();
+                selectedMedication = new Medication(manualName, Set.of("Unknown"), MedicationForm.TABLET, "Unknown", ColorCode.WHITE, true, durationDays);
+                pendingManualMedications.add(selectedMedication);
+            } else {
+                selectedMedication = (Medication) medicationComboBox.getSelectedItem();
+            }
+
+            MedicationOrder newOrder = new MedicationOrder(frequencyField.getText().trim(), durationDays);
+            newOrder.setMedication(selectedMedication);
+            pendingMedicationOrders.add(newOrder);
+
+            JOptionPane.showMessageDialog(medicationDialog, "Medication added to the queue! It will be saved when you Complete Consultation.");
+            medicationDialog.dispose();
+        });
+        medicationDialog.setVisible(true);
     }
 
     private void clearRightPanel() {
