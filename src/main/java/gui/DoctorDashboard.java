@@ -4,6 +4,9 @@ import entity.*;
 import entity.enums.ColorCode;
 import entity.enums.MedicationForm;
 import entity.enums.StatusType;
+import gui.dialogs.FollowUpDialog;
+import gui.dialogs.MedicationDialog;
+import gui.dialogs.SickNoteDialog;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import util.HibernateUtil;
@@ -211,31 +214,52 @@ public class DoctorDashboard extends JFrame {
         saveCompleteButton.addActionListener(e -> handleSaveComplete());
 
         addMedicationButton.addActionListener(e -> {
-            Appointment selectedApp = appointmentJList.getSelectedValue();
-            if (selectedApp == null) {
+            if (appointmentJList.getSelectedValue() == null) {
                 JOptionPane.showMessageDialog(this, "Please select an appointment first.", "Warning", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            showMedicationDialog();
+            MedicationDialog dialog = new MedicationDialog(this);
+            dialog.setVisible(true);
+
+            MedicationDialog.MedicationResult result = dialog.getResult();
+            if (result != null) {
+                pendingMedicationOrders.add(result.order);
+                if (result.manualMedication != null) {
+                    pendingManualMedications.add(result.manualMedication);
+                }
+                JOptionPane.showMessageDialog(this, "Medication added to the queue!");
+            }
         });
 
         issueSickNoteButton.addActionListener(e -> {
-            Appointment selectedApp = appointmentJList.getSelectedValue();
-            if (selectedApp == null) {
+            if (appointmentJList.getSelectedValue() == null) {
                 JOptionPane.showMessageDialog(this, "Please select an appointment first.", "Warning", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            issueSickNoteDialog();
+
+            SickNoteDialog dialog = new SickNoteDialog(this);
+            dialog.setVisible(true);
+
+            if (dialog.getSickNote() != null) {
+                pendingSickNote = dialog.getSickNote();
+                JOptionPane.showMessageDialog(this, "Sick note added to the queue!");
+            }
         });
 
         scheduleFollowUpButton.addActionListener(e -> {
-            Appointment selectedApp = appointmentJList.getSelectedValue();
-            if (selectedApp == null) {
+            if (appointmentJList.getSelectedValue() == null) {
                 JOptionPane.showMessageDialog(this, "Please select an appointment first.", "Warning", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            showScheduleFollowUpDialog();
+
+            FollowUpDialog dialog = new FollowUpDialog(this);
+            dialog.setVisible(true);
+
+            if (dialog.getFollowUpDate() != null) {
+                pendingFollowUpDate = dialog.getFollowUpDate();
+                JOptionPane.showMessageDialog(this, "Follow-up appointment added to the queue!");
+            }
         });
     }
 
@@ -346,236 +370,6 @@ public class DoctorDashboard extends JFrame {
         }
     }
 
-    private void showMedicationDialog() {
-        JDialog medicationDialog = new JDialog(this, "Medication Dialog", true);
-        medicationDialog.setSize(400, 300);
-        medicationDialog.setLayout(new GridLayout(6, 2, 10, 10));
-        medicationDialog.setLocationRelativeTo(this);
-
-        DefaultComboBoxModel<Medication> medicationDefaultComboBoxModel = new DefaultComboBoxModel<>();
-
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            List<Medication> medications = session.createQuery("from Medication", Medication.class).list();
-            for (Medication medication : medications) {
-                medicationDefaultComboBoxModel.addElement(medication);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        JComboBox<Medication> medicationComboBox = new JComboBox<>(medicationDefaultComboBoxModel);
-        JCheckBox manuelEntryCheckBox = new JCheckBox("Medication Not Found (Manuel Entry)");
-        JTextField manuelMedicationNameField = new JTextField("");
-        manuelEntryCheckBox.setEnabled(false);
-
-        JTextField frequencyField = new JTextField("2x1");
-        JTextField durationDayField = new JTextField("7");
-
-        JButton confirmButton = new JButton("Confirm");
-        JButton cancelButton = new JButton("Cancel");
-
-        manuelEntryCheckBox.addActionListener(e -> {
-            boolean isManuelEntry = manuelEntryCheckBox.isSelected();
-            medicationComboBox.setEnabled(!isManuelEntry);
-            manuelMedicationNameField.setEnabled(isManuelEntry);
-        });
-
-        medicationDialog.add(new JLabel("Select from Catalog:"));
-        medicationDialog.add(medicationComboBox);
-        medicationDialog.add(manuelEntryCheckBox);
-        medicationDialog.add(new JLabel(""));
-        medicationDialog.add(new JLabel("Manual Med Name:"));
-        medicationDialog.add(manuelMedicationNameField);
-        medicationDialog.add(new JLabel("Frequency:"));
-        medicationDialog.add(frequencyField);
-        medicationDialog.add(new JLabel("Duration (Days):"));
-        medicationDialog.add(durationDayField);
-        medicationDialog.add(confirmButton);
-        medicationDialog.add(cancelButton);
-
-        cancelButton.addActionListener(e -> medicationDialog.dispose());
-
-        confirmButton.addActionListener(e -> {
-            String frequencyStr = frequencyField.getText().trim();
-            String durationStr = durationDayField.getText().trim();
-
-            if (frequencyStr.isEmpty() || durationStr.isEmpty()) {
-                JOptionPane.showMessageDialog(medicationDialog, "Frequency and Duration cannot be empty.", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            try {
-                int durationDays = Integer.parseInt(durationStr);
-                if (durationDays < 1) {
-                    JOptionPane.showMessageDialog(medicationDialog, "Duration must be at least 1 day.", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                Medication selectedMedication = null;
-
-                if (manuelEntryCheckBox.isSelected()) {
-                    String manualName = manuelMedicationNameField.getText().trim();
-                    if (manualName.isEmpty()) {
-                        JOptionPane.showMessageDialog(medicationDialog, "Please enter a manual medication name.", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                        return;
-                    }
-                    selectedMedication = new Medication(manualName, Set.of("Unknown"), MedicationForm.TABLET, "Unknown", ColorCode.WHITE, true, durationDays);
-                    pendingManualMedications.add(selectedMedication);
-                } else {
-                    selectedMedication = (Medication) medicationComboBox.getSelectedItem();
-                    if (selectedMedication == null) {
-                        JOptionPane.showMessageDialog(medicationDialog, "Please select a medication from the catalog.", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                        return;
-                    }
-                }
-
-                MedicationOrder newOrder = new MedicationOrder(frequencyStr, durationDays);
-                newOrder.setMedication(selectedMedication);
-                pendingMedicationOrders.add(newOrder);
-
-                JOptionPane.showMessageDialog(medicationDialog, "Medication added to the queue! It will be saved when you Complete Consultation.");
-                medicationDialog.dispose();
-
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(medicationDialog, "Invalid duration! Please enter a valid number of days.", "Input Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-        medicationDialog.setVisible(true);
-    }
-
-    private void issueSickNoteDialog() {
-        JDialog issueSickNoteDialog = new JDialog(this, "Issue Sick Note", true);
-        issueSickNoteDialog.setSize(350, 200);
-        issueSickNoteDialog.setLayout(new BorderLayout());
-        issueSickNoteDialog.setLocationRelativeTo(this);
-
-        JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 10, 30));
-
-        JLabel label = new JLabel("Enter rest days for Sick Note:");
-        label.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JTextField daysField = new JTextField(10);
-        daysField.setFont(new Font("Arial", Font.PLAIN, 14));
-
-        daysField.setMaximumSize(new Dimension(200, 30));
-        daysField.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        centerPanel.add(label);
-        centerPanel.add(Box.createVerticalStrut(10));
-        centerPanel.add(daysField);
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        JButton okButton = new JButton("OK");
-        JButton cancelButton = new JButton("Cancel");
-
-        buttonPanel.add(okButton);
-        buttonPanel.add(cancelButton);
-
-        issueSickNoteDialog.add(centerPanel, BorderLayout.CENTER);
-        issueSickNoteDialog.add(buttonPanel, BorderLayout.SOUTH);
-
-        cancelButton.addActionListener(e -> issueSickNoteDialog.dispose());
-
-        okButton.addActionListener(e -> {
-            try {
-                int days = Integer.parseInt(daysField.getText().trim());
-                if (days < 1) {
-                    JOptionPane.showMessageDialog(issueSickNoteDialog, "Please enter a valid number of days.");
-                    return;
-                }
-                String generatedId = "SN-" + System.currentTimeMillis();
-                pendingSickNote = new SickNote(generatedId, days, LocalDateTime.now());
-
-                JOptionPane.showMessageDialog(issueSickNoteDialog, "Sick note added to the queue! It will be saved when you Complete Consultation.");
-                issueSickNoteDialog.dispose();
-
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(issueSickNoteDialog, "Please enter a valid number.");
-            }
-        });
-        issueSickNoteDialog.setVisible(true);
-    }
-
-    private void showScheduleFollowUpDialog(){
-        JDialog dialog = new JDialog(this, "Schedule Follow Up", true);
-        dialog.setSize(400, 250);
-        dialog.setLayout(new BorderLayout());
-        dialog.setLocationRelativeTo(this);
-
-        JPanel centerPanel = new JPanel(new GridLayout(2, 2, 10, 10));
-//        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
-        JPanel timePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
-
-        JComboBox<Integer> dayCombo = new JComboBox<>();
-        for (int i = 1; i <= 31; i++) dayCombo.addItem(i);
-        JComboBox<Integer> monthCombo = new JComboBox<>();
-        for (int i = 1; i <= 12; i++) monthCombo.addItem(i);
-        JComboBox<Integer> yearCombo = new JComboBox<>();
-        int currentYear = LocalDate.now().getYear();
-        yearCombo.addItem(currentYear);
-        yearCombo.addItem(currentYear + 1);
-
-        datePanel.add(dayCombo);
-        datePanel.add(new JLabel("/"));
-        datePanel.add(monthCombo);
-        datePanel.add(new JLabel("/"));
-        datePanel.add(yearCombo);
-
-        JComboBox<String> hourCombo = new JComboBox<>();
-        for (int i = 8; i <= 18; i++) hourCombo.addItem(String.format("%02d", i));
-        JComboBox<String> minuteCombo = new JComboBox<>(new String[]{"00", "15", "30", "45"});
-
-        timePanel.add(hourCombo);
-        timePanel.add(new JLabel(":"));
-        timePanel.add(minuteCombo);
-
-        centerPanel.add(new JLabel("Select Date (DD/MM/YYYY):"));
-        centerPanel.add(datePanel);
-        centerPanel.add(new JLabel("Select Time (HH:MM):"));
-        centerPanel.add(timePanel);
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        JButton scheduleButton = new JButton("Schedule");
-        JButton cancelButton = new JButton("Cancel");
-
-        buttonPanel.add(scheduleButton);
-        buttonPanel.add(cancelButton);
-
-        dialog.add(centerPanel, BorderLayout.CENTER);
-        dialog.add(buttonPanel, BorderLayout.SOUTH);
-
-        cancelButton.addActionListener(e -> dialog.dispose());
-
-        scheduleButton.addActionListener(e -> {
-            try {
-                int day = (Integer) dayCombo.getSelectedItem();
-                int month = (Integer) monthCombo.getSelectedItem();
-                int year = (Integer) yearCombo.getSelectedItem();
-                int hour = Integer.parseInt((String) hourCombo.getSelectedItem());
-                int minute = Integer.parseInt((String) minuteCombo.getSelectedItem());
-
-                LocalDateTime selectedDateTime = LocalDateTime.of(year, month, day, hour, minute);
-
-                if (selectedDateTime.isBefore(LocalDateTime.now())) {
-                    JOptionPane.showMessageDialog(dialog, "Follow-up date cannot be in the past.", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-
-                pendingFollowUpDate = selectedDateTime;
-                JOptionPane.showMessageDialog(dialog, "Follow-up appointment added to the queue! It will be saved when you Complete Consultation.");
-                dialog.dispose();
-
-            } catch (java.time.DateTimeException ex) {
-                JOptionPane.showMessageDialog(dialog, "Invalid date selected (e.g., February 30). Please select a valid calendar date.", "Input Error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        dialog.setVisible(true);
-    }
-
     private void clearRightPanel() {
         patientNameLabel.setText("Patient Name: -");
         patientAgeLabel.setText("Patient Age: -");
@@ -584,5 +378,4 @@ public class DoctorDashboard extends JFrame {
         diagnosisTextArea.setText("");
         treatmentTextArea.setText("");
     }
-
 }
