@@ -53,8 +53,8 @@ public class SickNoteDialog extends JDialog {
 
             try {
                 int days = Integer.parseInt(inputText);
-                if (days < 1) {
-                    JOptionPane.showMessageDialog(this, "Please enter a valid number of days (1 or more).", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                if (days < 1  || days > 730) {
+                    JOptionPane.showMessageDialog(this, "Please enter a valid number of days (1 to 730).", "Validation Error", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 

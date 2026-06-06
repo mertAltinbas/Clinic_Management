@@ -45,8 +45,8 @@ public class MedicationDialog extends JDialog {
         manuelNameField.setEnabled(false);
         manuelDoseField.setEnabled(false);
 
-        JTextField frequencyField = new JTextField("2x1");
-        JTextField durationDayField = new JTextField("7");
+        JTextField frequencyField = new JTextField("");
+        JTextField durationDayField = new JTextField("");
 
         JButton confirmButton = new JButton("Confirm");
         JButton cancelButton = new JButton("Cancel");
@@ -79,8 +79,8 @@ public class MedicationDialog extends JDialog {
 
             try {
                 int durationDays = Integer.parseInt(durStr);
-                if (durationDays < 1) {
-                    JOptionPane.showMessageDialog(this, "Duration must be at least 1 day.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                if (durationDays < 1 || durationDays > 730) {
+                    JOptionPane.showMessageDialog(this, "Duration must be at least 1 day or maximum 730 days", "Validation Error", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
