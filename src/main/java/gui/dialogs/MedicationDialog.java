@@ -4,6 +4,7 @@ import entity.Medication;
 import entity.MedicationOrder;
 import entity.enums.ColorCode;
 import entity.enums.MedicationForm;
+import entity.enums.MedicationType;
 import org.hibernate.Session;
 import util.HibernateUtil;
 
@@ -30,7 +31,9 @@ public class MedicationDialog extends JDialog {
 
         DefaultComboBoxModel<Medication> comboModel = new DefaultComboBoxModel<>();
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            List<Medication> meds = session.createQuery("from Medication", Medication.class).list();
+            List<Medication> meds = session.createQuery("select m from Medication m join m.medicationTypes t where t = :type", Medication.class)
+                    .setParameter("type", MedicationType.PRESCRIBED)
+                    .list();
             for (Medication m : meds) {
                 comboModel.addElement(m);
             }

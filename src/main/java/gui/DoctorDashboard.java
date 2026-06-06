@@ -243,6 +243,11 @@ public class DoctorDashboard extends JFrame {
                 return;
             }
 
+            if (pendingSickNote != null) {
+                JOptionPane.showMessageDialog(this, "There is already a sick note in queue.", "Warning", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             SickNoteDialog dialog = new SickNoteDialog(this);
             dialog.setVisible(true);
 
@@ -253,7 +258,8 @@ public class DoctorDashboard extends JFrame {
         });
 
         scheduleFollowUpButton.addActionListener(e -> {
-            if (appointmentJList.getSelectedValue() == null) {
+            Appointment selectedApp = appointmentJList.getSelectedValue();
+            if (selectedApp == null) {
                 JOptionPane.showMessageDialog(this, "Please select an appointment first.", "Warning", JOptionPane.WARNING_MESSAGE);
                 return;
             }
@@ -262,8 +268,21 @@ public class DoctorDashboard extends JFrame {
             dialog.setVisible(true);
 
             if (dialog.getFollowUpDate() != null) {
-                pendingFollowUpDate = dialog.getFollowUpDate();
-                JOptionPane.showMessageDialog(this, "Follow-up appointment added to the queue!");
+                LocalDateTime chosenDate = dialog.getFollowUpDate();
+
+                try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+                    Doctor doc = (Doctor) session.merge(currentDoctor);
+
+                    if (!doc.checkSchedule(chosenDate)) {
+                        JOptionPane.showMessageDialog(this, "Doctor has another appointment in this date and time.", "Conflict", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    pendingFollowUpDate = chosenDate;
+                    JOptionPane.showMessageDialog(this, "Follow-up appointment added to the queue!");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
     }
