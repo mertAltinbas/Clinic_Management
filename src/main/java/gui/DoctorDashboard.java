@@ -151,9 +151,9 @@ public class DoctorDashboard extends JFrame {
                         Appointment activeApp = (Appointment) session.merge(selectedApp);
                         Patient patient = activeApp.getPatient();
 
-                        patientNameLabel.setText("Name: " + patient.getFirstName() + " " + patient.getLastName());
-                        patientAgeLabel.setText("Age: " + patient.getAge());
-                        patientBloodTypeLabel.setText("Blood Type: " + patient.getBloodType());
+                        patientNameLabel.setText("Patient Name: " + patient.getFirstName() + " " + patient.getLastName());
+                        patientAgeLabel.setText("Patient Age: " + patient.getAge());
+                        patientBloodTypeLabel.setText("Patient Blood Type: " + patient.getBloodType());
 
                         StringBuilder sb = new StringBuilder();
                         List<entity.MedicalNotes> pastNotes = patient.getMedicalNotes();
@@ -275,9 +275,9 @@ public class DoctorDashboard extends JFrame {
     }
 
     private void clearRightPanel() {
-        patientNameLabel.setText("Name: -");
-        patientAgeLabel.setText("Age: -");
-        patientBloodTypeLabel.setText("Blood Type: -");
+        patientNameLabel.setText("Patient Name: -");
+        patientAgeLabel.setText("Patient Age: -");
+        patientBloodTypeLabel.setText("Patient Blood Type: -");
         pastMedicalNotesTextArea.setText("");
         diagnosisTextArea.setText("");
         treatmentTextArea.setText("");

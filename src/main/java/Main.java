@@ -7,17 +7,9 @@ import java.awt.event.WindowEvent;
 
 public class Main {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            DoctorDashboard dashboard = new DoctorDashboard();
-            dashboard.setVisible(true);
+        Runtime.getRuntime().addShutdownHook(new Thread(HibernateUtil::shutdown));
 
-            dashboard.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent windowEvent){
-                    HibernateUtil.shutdown();
-                    System.exit(0);
-                }
-            });
-        });
+        DoctorDashboard dashboard = new DoctorDashboard();
+        dashboard.setVisible(true);
     }
 }
