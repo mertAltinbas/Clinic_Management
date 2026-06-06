@@ -13,10 +13,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 
 public class DoctorDashboard extends JFrame {
     // left panel components
@@ -127,8 +125,9 @@ public class DoctorDashboard extends JFrame {
     private void loadAppointments() {
         appointmentListModel.clear();
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            List<Appointment> appointmentList = session.createQuery("select a from Appointment a join fetch a.patient where a.status = :status", Appointment.class)
-                    .setParameter("status", StatusType.SCHEDULED)
+            List<StatusType> appointmentStatus = Arrays.asList(StatusType.SCHEDULED, StatusType.RESCHEDULED);
+            List<Appointment> appointmentList = session.createQuery("select a from Appointment a join fetch a.patient where a.status IN :status", Appointment.class)
+                    .setParameter("status", appointmentStatus)
                     .list();
 
             for (Appointment appointment : appointmentList) {
