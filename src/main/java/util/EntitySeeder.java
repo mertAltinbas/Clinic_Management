@@ -238,13 +238,13 @@ public class EntitySeeder {
             LocalDateTime twoDaysLater = today.plusDays(2);
 
             Appointment app1 = new Appointment("APP-001", today.withHour(9).withMinute(0), StatusType.COMPLETED, doc1, pat1);
-            Appointment app2 = new Appointment("APP-002", today.withHour(9).withMinute(30), StatusType.COMPLETED, doc1, pat2, "Patient reported mild headaches.");
+            Appointment app2 = new Appointment("APP-002", today.withHour(9).withMinute(30), StatusType.SCHEDULED, doc1, pat2, "Patient reported mild headaches.");
             Appointment app3 = new Appointment("APP-003", today.withHour(10).withMinute(0), StatusType.CANCELED, doc1, pat3);
             Appointment app4 = new Appointment("APP-004", today.withHour(10).withMinute(30), StatusType.SCHEDULED, doc1, pat4);
-            Appointment app5 = new Appointment("APP-005", today.withHour(11).withMinute(0), StatusType.COMPLETED, doc1, pat5, "ECG is normal.");
+            Appointment app5 = new Appointment("APP-005", today.withHour(11).withMinute(0), StatusType.SCHEDULED, doc1, pat5, "ECG is normal.");
             Appointment app6 = new Appointment("APP-006", tomorrow.withHour(11).withMinute(30), StatusType.RESCHEDULED, doc1, pat6, "Rescheduled to tomorrow.");
             Appointment app7 = new Appointment("APP-007", today.withHour(13).withMinute(0), StatusType.SCHEDULED, doc1, pat7);
-            Appointment app8 = new Appointment("APP-008", today.withHour(13).withMinute(30), StatusType.COMPLETED, doc1, pat8, "Post-op checkup looking good.");
+            Appointment app8 = new Appointment("APP-008", today.withHour(13).withMinute(30), StatusType.SCHEDULED, doc1, pat8, "Post-op checkup looking good.");
             Appointment app9 = new Appointment("APP-009", today.withHour(14).withMinute(0), StatusType.SCHEDULED, doc1, pat9);
             Appointment app10 = new Appointment("APP-010", today.withHour(14).withMinute(30), StatusType.SCHEDULED, doc1, pat10, "Follow-up for minor fracture.");
             Appointment app11 = new Appointment("APP-011", tomorrow.withHour(9).withMinute(0), StatusType.SCHEDULED, doc1, pat11);

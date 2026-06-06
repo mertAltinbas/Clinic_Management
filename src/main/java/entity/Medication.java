@@ -241,6 +241,11 @@ public class Medication {
     }
 
     @Override
+    public String toString() {
+        return getName() + " " + getDose();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Medication)) return false;
