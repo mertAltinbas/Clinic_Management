@@ -271,7 +271,7 @@ public class DoctorDashboard extends JFrame {
     private void handleNoShow() {
         Appointment selectedAppointment = appointmentJList.getSelectedValue();
         if (selectedAppointment == null) {
-            JOptionPane.showMessageDialog(this, "Please select an appointment to show.");
+            JOptionPane.showMessageDialog(this, "Please select an appointment first.", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
         int confirm = JOptionPane.showConfirmDialog(this, "Mark this patient as No-Show?", "Confirm", JOptionPane.YES_NO_OPTION);
