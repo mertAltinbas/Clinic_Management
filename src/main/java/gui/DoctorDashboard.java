@@ -46,7 +46,10 @@ public class DoctorDashboard extends JFrame {
     private SickNote pendingSickNote = null;
     private LocalDateTime pendingFollowUpDate = null;
 
-    public DoctorDashboard() {
+    private Doctor currentDoctor;
+
+    public DoctorDashboard(Doctor loggedInDoctor) {
+        this.currentDoctor = loggedInDoctor;
         setTitle("Doctor Dashboard");
         setSize(1280, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -141,10 +144,12 @@ public class DoctorDashboard extends JFrame {
             List<Appointment> appointmentList = session.createQuery(
                             "select a from Appointment a join fetch a.patient " +
                                     "where a.status IN :status " +
-                                    "and a.dateTime >= :startOfDay and a.dateTime < :endOfDay", Appointment.class)
+                                    "and a.dateTime >= :startOfDay and a.dateTime < :endOfDay " +
+                                    "and a.doctor = :currentDoc", Appointment.class)
                     .setParameter("status", appointmentStatus)
                     .setParameter("startOfDay", startOfDay)
                     .setParameter("endOfDay", endOfDay)
+                    .setParameter("currentDoc", currentDoctor)
                     .list();
 
             for (Appointment appointment : appointmentList) {
