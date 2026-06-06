@@ -74,6 +74,10 @@ public class DoctorDashboard extends JFrame {
         patientAgeLabel = new JLabel("Patient Age:");
         patientBloodTypeLabel = new JLabel("Patient Blood Type:");
 
+        profileDataPanel.add(patientNameLabel);
+        profileDataPanel.add(patientAgeLabel);
+        profileDataPanel.add(patientBloodTypeLabel);
+
         pastMedicalNotesTextArea = new JTextArea(8, 40);
         pastMedicalNotesTextArea.setEditable(false);
 
@@ -142,11 +146,10 @@ public class DoctorDashboard extends JFrame {
             if (!e.getValueIsAdjusting()) {
                 Appointment selectedApp = appointmentJList.getSelectedValue();
                 if (selectedApp != null) {
-                    // LazyInitializationException almamak için yeni bir session açıp nesnemizi aktifleştiriyoruz
                     try (Session session = HibernateUtil.getSessionFactory().openSession()) {
 
                         Appointment activeApp = (Appointment) session.merge(selectedApp);
-                        Patient patient = activeApp.getPatient(); // SQL sorgusu yok, ilişkiyle gidiyoruz
+                        Patient patient = activeApp.getPatient();
 
                         patientNameLabel.setText("Name: " + patient.getFirstName() + " " + patient.getLastName());
                         patientAgeLabel.setText("Age: " + patient.getAge());
