@@ -76,6 +76,11 @@ public class Specialization {
     }
 
     @Override
+    public String toString() {
+        return getTitle();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Specialization)) return false;

@@ -3,7 +3,7 @@ import gui.DoctorDashboard;
 import org.hibernate.Session;
 import util.HibernateUtil;
 
-public class Main {
+public class DoctorScenario {
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new Thread(HibernateUtil::shutdown));
 
