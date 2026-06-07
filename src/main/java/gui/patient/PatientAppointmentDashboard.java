@@ -4,6 +4,7 @@ import entity.Appointment;
 import entity.Doctor;
 import entity.Patient;
 import entity.Specialization;
+import gui.patient.dialogs.UpdateAppointmentDialog;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import util.HibernateUtil;
@@ -213,7 +214,7 @@ public class PatientAppointmentDashboard extends JFrame {
         cancelButton = new JButton("Cancel");
 
         confirmButton.setEnabled(false);
-        updateButton.setEnabled(false);
+        updateButton.setEnabled(true);
 
         actionPanel.add(confirmButton);
         actionPanel.add(updateButton);
@@ -356,5 +357,10 @@ public class PatientAppointmentDashboard extends JFrame {
         });
 
         cancelButton.addActionListener(e -> dispose());
+
+        updateButton.addActionListener(e -> {
+            UpdateAppointmentDialog dialog = new UpdateAppointmentDialog(this, currentPatient);
+            dialog.setVisible(true);
+        });
     }
 }
