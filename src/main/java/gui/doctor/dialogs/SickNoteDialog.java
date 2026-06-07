@@ -1,4 +1,4 @@
-package gui.dialogs;
+package gui.doctor.dialogs;
 
 import entity.SickNote;
 

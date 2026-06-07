@@ -1,5 +1,5 @@
 import entity.Doctor;
-import gui.DoctorDashboard;
+import gui.doctor.DoctorDashboard;
 import org.hibernate.Session;
 import util.HibernateUtil;
 

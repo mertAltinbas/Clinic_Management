@@ -1,4 +1,4 @@
-package gui;
+package gui.patient;
 
 import entity.Appointment;
 import entity.Doctor;

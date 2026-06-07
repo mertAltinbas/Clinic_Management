@@ -1,12 +1,10 @@
-package gui;
+package gui.doctor;
 
 import entity.*;
-import entity.enums.ColorCode;
-import entity.enums.MedicationForm;
 import entity.enums.StatusType;
-import gui.dialogs.FollowUpDialog;
-import gui.dialogs.MedicationDialog;
-import gui.dialogs.SickNoteDialog;
+import gui.doctor.dialogs.FollowUpDialog;
+import gui.doctor.dialogs.MedicationDialog;
+import gui.doctor.dialogs.SickNoteDialog;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import util.HibernateUtil;

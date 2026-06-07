@@ -1,5 +1,5 @@
 import entity.Patient;
-import gui.PatientAppointmentDashboard;
+import gui.patient.PatientAppointmentDashboard;
 import org.hibernate.Session;
 import util.HibernateUtil;
 
