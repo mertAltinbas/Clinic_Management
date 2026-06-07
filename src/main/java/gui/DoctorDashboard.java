@@ -341,9 +341,6 @@ public class DoctorDashboard extends JFrame {
             activeApp.setMedicalNotes(newNote);
             activeApp.updateStatus(StatusType.COMPLETED);
 
-            session.persist(newNote);
-            session.merge(activeApp);
-
             if (pendingManualMedications != null && !pendingManualMedications.isEmpty()) {
                 for (Medication manualMed : pendingManualMedications) {
                     session.persist(manualMed);
@@ -351,18 +348,15 @@ public class DoctorDashboard extends JFrame {
             }
 
             if (pendingMedicationOrders != null && !pendingMedicationOrders.isEmpty()) {
-                for (MedicationOrder order : pendingMedicationOrders) {
-                    Medication managedMed = (Medication) session.merge(order.getMedication());
+                for (MedicationOrder pendingOrder : pendingMedicationOrders) {
+                    Medication managedMed = (Medication) session.merge(pendingOrder.getMedication());
 
-                    order.setMedication(managedMed);
-                    order.setMedicalNotes(newNote);
-
-                    newNote.addMedicationOrder(order);
-                    managedMed.addMedicationOrder(order);
-
-                    session.persist(order);
+                    newNote.addPrescription(managedMed, pendingOrder.getFrequency(), pendingOrder.getDurationDay());
                 }
             }
+
+            session.persist(newNote);
+            session.merge(activeApp);
 
             if (pendingSickNote != null) {
                 newNote.setSickNote(pendingSickNote);
