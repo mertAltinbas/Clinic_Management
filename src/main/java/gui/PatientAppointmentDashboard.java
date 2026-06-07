@@ -11,43 +11,36 @@ import util.HibernateUtil;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 public class PatientAppointmentDashboard extends JFrame {
     private Patient currentPatient;
 
-    // top left - doctor area
     private JComboBox<Specialization> specializationComboBox;
     private JTable doctorTable;
     private DefaultTableModel doctorTableModel;
     private JButton selectDoctorButton;
 
-    // top right - date and time area
     private JComboBox<String> dateComboBox;
     private JComboBox<String> timeComboBox;
     private JButton checkAvailabilityButton;
 
-    // middle left - summary appointment
     private JTextField selectedDoctorField;
     private JTextField appointmentTimeField;
     private JTextField appointmentStatusField;
     private JTextField patientNameSurnameField;
 
-    // middle right invoice
     private JTextField feeField;
     private JTextField vatField;
     private JTextField totalField;
 
-    // buttons
     private JButton confirmButton;
     private JButton updateButton;
     private JButton cancelButton;
-    private JLabel statusLabel;
 
-    // state variables
     private List<Doctor> currentDoctorsList;
     private Doctor selectedDoctor;
     private LocalDateTime selectedDateTime;
@@ -62,6 +55,10 @@ public class PatientAppointmentDashboard extends JFrame {
         initUI();
         loadInitialData();
         initListener();
+
+        if (specializationComboBox.getItemCount() > 0) {
+            updateDoctorTable((Specialization) specializationComboBox.getSelectedItem());
+        }
     }
 
     public void loadInitialData() {
@@ -80,10 +77,9 @@ public class PatientAppointmentDashboard extends JFrame {
             for (Specialization specialization : specializationList) {
                 specializationComboBox.addItem(specialization);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error occurred while fetching specialization data" + e.getMessage());
+            JOptionPane.showMessageDialog(this, "Error occurred while fetching specialization data: " + e.getMessage());
         }
     }
 
@@ -93,16 +89,25 @@ public class PatientAppointmentDashboard extends JFrame {
         mainContentPanel.setLayout(new BoxLayout(mainContentPanel, BoxLayout.Y_AXIS));
         mainContentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // top panel - doctor + time date
         JPanel topPanel = new JPanel(new GridLayout(1, 2, 10, 10));
 
-        // doctor side
         JPanel doctorSelectionPanel = new JPanel(new BorderLayout(5, 5));
         doctorSelectionPanel.setBorder(BorderFactory.createTitledBorder("Doctor Selection"));
 
         JPanel specPanel = new JPanel(new BorderLayout());
         specPanel.add(new JLabel("Select a specialization: "), BorderLayout.WEST);
+
         specializationComboBox = new JComboBox<>();
+        specializationComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof Specialization) {
+                    setText(((Specialization) value).getTitle());
+                }
+                return this;
+            }
+        });
         specPanel.add(specializationComboBox, BorderLayout.CENTER);
 
         doctorTableModel = new DefaultTableModel(new String[]{"Doctor Name", "Fee"}, 0) {
@@ -112,6 +117,7 @@ public class PatientAppointmentDashboard extends JFrame {
             }
         };
         doctorTable = new JTable(doctorTableModel);
+        doctorTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane tableScrollPane = new JScrollPane(doctorTable);
 
         selectDoctorButton = new JButton("Select Doctor");
@@ -122,7 +128,6 @@ public class PatientAppointmentDashboard extends JFrame {
         doctorSelectionPanel.add(tableScrollPane, BorderLayout.CENTER);
         doctorSelectionPanel.add(selectButtonPanel, BorderLayout.SOUTH);
 
-        // date and time side
         JPanel dateTimePanel = new JPanel(new GridBagLayout());
         dateTimePanel.setBorder(BorderFactory.createTitledBorder("Date and Time"));
         GridBagConstraints gridBagConstraints = new GridBagConstraints();
@@ -156,12 +161,10 @@ public class PatientAppointmentDashboard extends JFrame {
         topPanel.add(doctorSelectionPanel);
         topPanel.add(dateTimePanel);
 
-        // middle panel - invoice and summary
         JPanel middlePanel = new JPanel(new GridLayout(1, 2, 10, 10));
         middlePanel.setBorder(BorderFactory.createTitledBorder("Confirm and Invoice Details"));
 
-        // left - summary of appointment
-        JPanel summaryPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+        JPanel summaryPanel = new JPanel(new GridLayout(4, 2, 5, 5));
         summaryPanel.setBorder(BorderFactory.createTitledBorder("Summary of Appointment"));
 
         selectedDoctorField = new JTextField();
@@ -182,7 +185,6 @@ public class PatientAppointmentDashboard extends JFrame {
         summaryPanel.add(new JLabel("Patient:"));
         summaryPanel.add(patientNameSurnameField);
 
-        // Invoice information
         JPanel invoicePanel = new JPanel(new GridLayout(3, 2, 5, 5));
         invoicePanel.setBorder(BorderFactory.createTitledBorder("Invoice Details"));
 
@@ -195,7 +197,7 @@ public class PatientAppointmentDashboard extends JFrame {
 
         invoicePanel.add(new JLabel("Total Fee:"));
         invoicePanel.add(feeField);
-        invoicePanel.add(new JLabel("Vat (%20):"));
+        invoicePanel.add(new JLabel("VAT (20%):"));
         invoicePanel.add(vatField);
         invoicePanel.add(new JLabel("Total:"));
         invoicePanel.add(totalField);
@@ -203,7 +205,6 @@ public class PatientAppointmentDashboard extends JFrame {
         middlePanel.add(summaryPanel);
         middlePanel.add(invoicePanel);
 
-        // bottom side - buttons
         JPanel bottomPanel = new JPanel(new BorderLayout());
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
 
@@ -218,6 +219,8 @@ public class PatientAppointmentDashboard extends JFrame {
         actionPanel.add(updateButton);
         actionPanel.add(cancelButton);
 
+        bottomPanel.add(actionPanel, BorderLayout.CENTER);
+
         mainContentPanel.add(topPanel);
         mainContentPanel.add(Box.createVerticalStrut(10));
         mainContentPanel.add(middlePanel);
@@ -227,52 +230,56 @@ public class PatientAppointmentDashboard extends JFrame {
         add(mainContentPanel, BorderLayout.CENTER);
     }
 
-    public void initListener() {
-        // fetch doctors
-        specializationComboBox.addActionListener(e -> {
-            Specialization selectedSpecialization = (Specialization) specializationComboBox.getSelectedItem();
-            if (selectedSpecialization != null) {
-                doctorTableModel.setRowCount(0); // clear table
-                try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-                    currentDoctorsList = session.createQuery(
-                                    "select d from Doctor d where d.specialization.id = :specId", Doctor.class)
-                            .setParameter("specId", selectedSpecialization.getId())
-                            .list();
+    private void updateDoctorTable(Specialization selectedSpec) {
+        doctorTableModel.setRowCount(0);
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            currentDoctorsList = session.createQuery(
+                            "select d from Doctor d where d.specialization.id = :specId", Doctor.class)
+                    .setParameter("specId", selectedSpec.getId())
+                    .list();
 
-                    for (Doctor doctor : currentDoctorsList) {
-                        doctorTableModel.addRow(new Object[]{doctor.getName() + " " + doctor.getSurname(), doctor.getConsultationFee() + " $"});
-                    }
-                }
+            for (Doctor doc : currentDoctorsList) {
+                doctorTableModel.addRow(new Object[]{"Dr. " + doc.getName() + " " + doc.getSurname(), doc.getConsultationFee() + " $"});
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void initListener() {
+        specializationComboBox.addActionListener(e -> {
+            Specialization selectedSpec = (Specialization) specializationComboBox.getSelectedItem();
+            if (selectedSpec != null) {
+                updateDoctorTable(selectedSpec);
+                selectedDoctor = null;
+                confirmButton.setEnabled(false);
+                appointmentTimeField.setText("");
+                appointmentStatusField.setText("Draft");
             }
         });
 
-        // select doctor button
-        selectedDoctorField.addActionListener(e -> {
+        selectDoctorButton.addActionListener(e -> {
             int selectedRow = doctorTable.getSelectedRow();
             if (selectedRow >= 0 && currentDoctorsList != null) {
                 selectedDoctor = currentDoctorsList.get(selectedRow);
 
-                // update ui
-                selectedDoctorField.setText(selectedDoctor.getName() + " " + selectedDoctor.getSurname());
+                selectedDoctorField.setText("Dr. " + selectedDoctor.getName() + " " + selectedDoctor.getSurname());
                 feeField.setText(selectedDoctor.getConsultationFee() + " $");
 
-                // calculation kdv
                 double fee = selectedDoctor.getConsultationFee();
                 double vat = fee * 0.20;
-                vatField.setText(String.format("%.2f", vat));
-                totalField.setText(String.format("%.2f", fee + vat));
+                vatField.setText(String.format(Locale.US, "%.2f", vat));
+                totalField.setText(String.format(Locale.US, "%.2f", fee + vat));
 
-                statusLabel.setText(" Doctor selected. Please date/time availability");
                 confirmButton.setEnabled(false);
             } else {
-                JOptionPane.showMessageDialog(this, "Please select a Doctor");
+                JOptionPane.showMessageDialog(this, "Please select a Doctor from the table.");
             }
         });
 
-        // check doctor availability
         checkAvailabilityButton.addActionListener(e -> {
             if (selectedDoctor == null) {
-                JOptionPane.showMessageDialog(this, "Please select a Doctor.");
+                JOptionPane.showMessageDialog(this, "Please select a Doctor first.");
                 return;
             }
 
@@ -284,19 +291,26 @@ public class PatientAppointmentDashboard extends JFrame {
             int min = Integer.parseInt(timeParts[1]);
             selectedDateTime = LocalDate.parse(dateStr).atTime(hour, min);
 
+            if (selectedDateTime.isBefore(LocalDateTime.now())) {
+                JOptionPane.showMessageDialog(this, "You cannot select a past date and time.", "Invalid Time", JOptionPane.WARNING_MESSAGE);
+                appointmentTimeField.setText("");
+                appointmentStatusField.setText("Draft (Invalid Time)");
+                confirmButton.setEnabled(false);
+                return;
+            }
+
             try (Session session = HibernateUtil.getSessionFactory().openSession()) {
                 Doctor dbDoctor = session.createQuery(
-                                "select d from Doctor d left join fetch d.appointments where d.id = :docId", Doctor.class)
+                                "select distinct d from Doctor d left join fetch d.appointments where d.id = :docId", Doctor.class)
                         .setParameter("docId", selectedDoctor.getId())
                         .uniqueResult();
 
                 if (dbDoctor.checkSchedule(selectedDateTime)) {
                     appointmentTimeField.setText(dateStr + " " + timeStr);
                     appointmentStatusField.setText("Draft (Available)");
-                    statusLabel.setText(" Given time OK. You can approve");
                     confirmButton.setEnabled(true);
                 } else {
-                    JOptionPane.showMessageDialog(this, "Conflict! Doctor has another appointment at given date and time.", "Warning", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Conflict! The doctor has another appointment at this time.", "Warning", JOptionPane.WARNING_MESSAGE);
                     appointmentTimeField.setText("");
                     appointmentStatusField.setText("Draft (Conflict)");
                     confirmButton.setEnabled(false);
@@ -304,16 +318,16 @@ public class PatientAppointmentDashboard extends JFrame {
             }
         });
 
-        // approve appointment
         confirmButton.addActionListener(e -> {
-            if (selectedDoctor == null || selectedDateTime  == null) {
-                JOptionPane.showMessageDialog(this, "Please select a Doctor or Date Time.");
+            if (selectedDoctor == null || selectedDateTime == null) {
+                JOptionPane.showMessageDialog(this, "Please select a Doctor and check availability.");
+                return;
             }
 
             try (Session session = HibernateUtil.getSessionFactory().openSession()) {
                 Transaction transaction = session.beginTransaction();
 
-                Patient dbPatient = session.get(Patient.class, selectedDoctor.getId());
+                Patient dbPatient = session.get(Patient.class, currentPatient.getId());
                 Doctor dbDoctor = session.get(Doctor.class, selectedDoctor.getId());
 
                 String generatedAppId = "APP-" + System.currentTimeMillis();
@@ -328,22 +342,19 @@ public class PatientAppointmentDashboard extends JFrame {
 
                 transaction.commit();
 
-                // update ui
                 appointmentStatusField.setText(lastAppointmentAdded.getStatus().toString());
-                statusLabel.setText(" Appointment created successfully! Invoice ID: " + lastAppointmentAdded.getInvoice().getId());
 
                 JOptionPane.showMessageDialog(this,
-                        "Appointment Approved!\nInvoice ID: " + lastAppointmentAdded.getInvoice().getInvoiceId(),
-                        "Successfully", JOptionPane.INFORMATION_MESSAGE);
+                        "Appointment Confirmed!\nInvoice ID: " + lastAppointmentAdded.getInvoice().getInvoiceId(),
+                        "Success", JOptionPane.INFORMATION_MESSAGE);
 
-                dispose();
+                confirmButton.setEnabled(false);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error saving appointment: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        // cancel
-        checkAvailabilityButton.addActionListener(e -> dispose());
+        cancelButton.addActionListener(e -> dispose());
     }
 }
