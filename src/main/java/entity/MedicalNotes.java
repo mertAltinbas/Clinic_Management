@@ -154,11 +154,12 @@ public class MedicalNotes {
         if (!(o instanceof MedicalNotes)) return false;
         MedicalNotes that = (MedicalNotes) o;
         return Objects.equals(treatment, that.treatment)
-                && Objects.equals(creationDate, that.creationDate);
+                && Objects.equals(creationDate, that.creationDate)
+                && Objects.equals(diagnosis, that.diagnosis);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(treatment, creationDate);
+        return Objects.hash(treatment, creationDate, diagnosis);
     }
 }

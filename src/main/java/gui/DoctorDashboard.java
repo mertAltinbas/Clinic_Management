@@ -353,9 +353,10 @@ public class DoctorDashboard extends JFrame {
             if (pendingMedicationOrders != null && !pendingMedicationOrders.isEmpty()) {
                 for (MedicationOrder order : pendingMedicationOrders) {
                     Medication managedMed = (Medication) session.merge(order.getMedication());
-                    order.setMedication(managedMed);
 
+                    order.setMedication(managedMed);
                     order.setMedicalNotes(newNote);
+
                     newNote.addMedicationOrder(order);
                     managedMed.addMedicationOrder(order);
 
@@ -372,6 +373,8 @@ public class DoctorDashboard extends JFrame {
                 String generatedAppId = "APP-FU-" + System.currentTimeMillis();
 
                 Appointment followUpApp = new Appointment(generatedAppId, pendingFollowUpDate, StatusType.SCHEDULED, activeApp.getDoctor(), patient, "Follow-up scheduled after consultation.");
+                activeApp.getDoctor().addAppointment(followUpApp);
+                patient.addAppointment(followUpApp);
 
                 session.persist(followUpApp);
             }

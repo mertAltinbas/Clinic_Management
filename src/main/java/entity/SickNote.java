@@ -70,7 +70,9 @@ public class SickNote {
 
     public void setMedicalNotes(MedicalNotes medicalNotes) {
         if (this.medicalNotes == medicalNotes) return;
-        this.medicalNotes = medicalNotes;
-        medicalNotes.setSickNote(this);
+        if (medicalNotes != null) {
+            this.medicalNotes = medicalNotes;
+            medicalNotes.setSickNote(this);
+        }
     }
 }

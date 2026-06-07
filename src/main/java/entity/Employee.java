@@ -119,7 +119,7 @@ public abstract class Employee {
     public void removePhoneNumber(String phoneNumber) {
         if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
             if (this.phoneNumber.size() <= 1 && this.phoneNumber.contains(phoneNumber)) {
-                throw new IllegalStateException("Cannot remove the last active ingredient. Medication must have at least one.");
+                throw new IllegalStateException("Cannot remove the last phone number. Phone number must have at least one.");
             }
             this.phoneNumber.remove(phoneNumber);
         }
