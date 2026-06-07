@@ -377,6 +377,9 @@ public class DoctorDashboard extends JFrame {
                 patient.addAppointment(followUpApp);
 
                 session.persist(followUpApp);
+                if (pendingFollowUpDate.toLocalDate().equals(LocalDate.now())) {
+                    appointmentListModel.addElement(followUpApp);
+                }
             }
 
             transaction.commit();

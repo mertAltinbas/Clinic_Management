@@ -67,16 +67,23 @@ public class Doctor extends Employee {
         patient.scheduleAppointment(this, uniqueAppointmentId, dateTime, note);
     }
 
-    public boolean checkSchedule(LocalDateTime dateTime){
-        if (dateTime == null) return false;
+    public boolean checkSchedule(LocalDateTime newStartTime) {
+        if (newStartTime == null) return false;
+
+        LocalDateTime newEndTime = newStartTime.plusMinutes(29);
 
         for (Appointment app : appointments) {
-            if (app.getDateTime().equals(dateTime) &&
-                    (app.getStatus() == entity.enums.StatusType.SCHEDULED || app.getStatus() == entity.enums.StatusType.RESCHEDULED)) {
-                return false;
+            if (app.getStatus() == entity.enums.StatusType.SCHEDULED || app.getStatus() == entity.enums.StatusType.RESCHEDULED) {
+
+                LocalDateTime existingStartTime = app.getDateTime();
+                LocalDateTime existingEndTime = existingStartTime.plusMinutes(29);
+
+                if (newStartTime.isBefore(existingEndTime) && newEndTime.isAfter(existingStartTime)) {
+                    return false;
+                }
             }
         }
-        return true;
+        return true; // Çakışma yok, randevu alınabilir
     }
 
     public Specialization getSpecialization() {
