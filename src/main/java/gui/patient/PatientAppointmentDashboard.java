@@ -14,6 +14,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -234,10 +235,8 @@ public class PatientAppointmentDashboard extends JFrame {
     private void updateDoctorTable(Specialization selectedSpec) {
         doctorTableModel.setRowCount(0);
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            currentDoctorsList = session.createQuery(
-                            "select d from Doctor d where d.specialization.id = :specId", Doctor.class)
-                    .setParameter("specId", selectedSpec.getId())
-                    .list();
+            Specialization spec = session.get(Specialization.class, selectedSpec.getId());
+            currentDoctorsList = new ArrayList<>(spec.getDoctorsMap().values());
 
             for (Doctor doc : currentDoctorsList) {
                 doctorTableModel.addRow(new Object[]{"Dr. " + doc.getName() + " " + doc.getSurname(), doc.getConsultationFee() + " $"});
