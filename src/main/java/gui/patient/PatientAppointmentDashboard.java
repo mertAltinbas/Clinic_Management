@@ -51,7 +51,7 @@ public class PatientAppointmentDashboard extends JFrame {
         this.currentPatient = loggedInPatient;
         setTitle("Appointment System - Create an Appointment");
         setSize(950, 650);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
         initUI();
