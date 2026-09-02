@@ -83,7 +83,7 @@ public class Doctor extends Employee {
                 }
             }
         }
-        return true; // Çakışma yok, randevu alınabilir
+        return true;
     }
 
     public Specialization getSpecialization() {

@@ -160,7 +160,7 @@ public class UpdateAppointmentDialog extends JDialog {
                 try (Session session = HibernateUtil.getSessionFactory().openSession()) {
                     Transaction tx = session.beginTransaction();
                     Appointment dbApp = session.get(Appointment.class, selectedApp.getId());
-                    dbApp.cancelAppointment(); // Entity icindeki metot
+                    dbApp.cancelAppointment();
                     session.merge(dbApp);
                     tx.commit();
 
@@ -211,7 +211,7 @@ public class UpdateAppointmentDialog extends JDialog {
                     tx.commit();
 
                     JOptionPane.showMessageDialog(this, "Appointment rescheduled to " + dateStr + " " + timeStr + ".", "Success", JOptionPane.INFORMATION_MESSAGE);
-                    loadAppointments(); // Tabloyu yenile
+                    loadAppointments();
                     rescheduleButton.setEnabled(false);
                     cancelAppButton.setEnabled(false);
                 } else {
