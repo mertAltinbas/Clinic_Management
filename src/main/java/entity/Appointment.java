@@ -43,7 +43,7 @@ public class Appointment {
     @OneToOne(mappedBy = "appointment", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Invoice invoice;
 
-    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "appointment", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private MedicalNotes medicalNotes;
 
     public Appointment() {
